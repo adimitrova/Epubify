@@ -159,5 +159,3 @@ if __name__ == '__main__':
 
     # https://stackoverflow.com/questions/1325581/how-do-i-check-if-im-running-on-windows-in-python
     # https://medium.com/dreamcatcher-its-blog/making-an-stand-alone-executable-from-a-python-script-using-pyinstaller-d1df9170e263
-
-    # main()

@@ -115,16 +115,6 @@ class Pocket(object):
         url = "https://getpocket.com/v3/oauth/authorize"
         response = self.__post_req(base_url=url, params=params)
         self.access_code = re.findall("(?:access_token=)(.+)(?:&.+)", response.text)
-        # Next:
-        """
-        access token contains a Response object. Figure
-        out how to convert to json because response.json() fails
-        OR get the toekn from response.text with a regex. 
-        Then, using the token, store it and request the user's list
-        This is the converted user access code from step 1 + 
-        users authorization of the epubify app
-        """
-        # TODO: code here
 
         print(">> Step 3 [Authorization] complete.")
 
