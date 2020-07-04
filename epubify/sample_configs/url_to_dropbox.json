@@ -1,0 +1,27 @@
+{
+    "from": {
+        "system": "url"
+    },
+    "to": {
+        "mode": "remote",
+        "system": "dropbox",
+        "filePath": "/Stuff/epubify/"
+    },
+    "articles": [
+        {
+            "URL": "https://en.wikipedia.org/wiki/Chicxulub_crater",
+            "title": "Chicxulub_crater",
+            "author": "wikipedia"
+        },
+        {
+            "URL": "http://www.big5.bg/analiz/item/18644-balgariya-prevzetata-darzhava.html",
+            "title": "Bulgaria_prevzetata_darjava",
+            "author": "Big5"
+        },
+        {
+            "URL": "https://getpocket.com/redirect?url=https%3A%2F%2Fwww.opendemocracy.net%2Fen%2Fcan-europe-make-it%2Fhow-dismantle-democracy-case-bulgaria%2F%3Ffbclid%3DIwAR2L_UuxikSOumSPAg5i2V9EoySqovy2gvvJ1A60E839dV3TnjGXTIXgZrU",
+            "title": "How_to_dismantle_a_democracy",
+            "author": "openDemocracy"
+        }
+    ]
+}
