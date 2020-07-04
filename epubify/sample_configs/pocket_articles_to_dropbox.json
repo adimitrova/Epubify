@@ -1,0 +1,10 @@
+{
+    "from": {
+        "system": "pocket"
+    },
+    "to": {
+        "mode": "remote",
+        "system": "dropbox",
+        "filePath": "REMOVE_FOR_ROOT"
+    }
+}
