@@ -18,3 +18,6 @@ CMD ["python", "-m", "epubify", "-cf", "epubify/sample_configs/pocket_articles_t
 # Using miniconda (make sure to replace 'myenv' w/ your environment name):
 #RUN conda env create -f environment.yml
 #CMD /bin/bash -c "source activate myenv && python3 -m epubify"
+
+# TODO:
+# figure out how to open a browser on host machine via docker image in order to authorize pocket
