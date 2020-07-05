@@ -1,11 +1,11 @@
 import json, argparse
 from sys import modules, argv, exit
-# from .epubify import Epubify
-from importlib import import_module
+from .epubify import Epubify
+from .utils import system_import
+from .ascii_art import books
 
-epubify = import_module(name="epubify", package="epubify")
-utils = import_module(name="utils", package="epubify")
-
+# epubify = import_module(name="epubify", package="epubify")
+# utils = import_module(name="utils", package="epubify")
 
 def parse_json(fp):
     with open(fp, 'r') as file:
@@ -63,13 +63,13 @@ def input_prompt():
 
 def process_book(**config):
     print("Processing book.. \n\n")
-    epub = epubify.Epubify(**config)
+    epub = Epubify(**config)
     # Note: Cascading/Chaining method calls - SO COOOOOL BRO!!!!!!!!!
     ebook = epub.fetch_html_text().preprocess_text().create_book()
     epub.save_book(book=ebook, sys='dropbox')
 
 
-def main(**config):
+def execute(**config):
     # config = input_prompt()
     # TODO: Implement subdictionaries or list of items in order to have multiple books processed at once
 
@@ -90,13 +90,14 @@ def main(**config):
         # TODO: create a pocket object and fetch the URLs and titles of the articles
         # Then process one by one like above
         print(">> Reading from source system [%s]" % config['from']['system'])
-        src_system = utils.system_import('pocket', **config)
+        src_system = system_import('pocket', **config)
         articles = src_system.get_article_list().fetch_articles()
     else:
         process_book(**config)
+    print(books)
 
 
-if __name__ == '__main__':
+def main(**config):
     # TODO: CREATE AN EXECUTABLE with pyinstaller
     # TODO: Loop over multiple files
     ## https://realpython.com/pyinstaller-python/#preparing-your-project
@@ -151,11 +152,15 @@ if __name__ == '__main__':
         if args.mode == 'remote' and not args.token:
             print(">> Dropbox token is required for remote mode.")
             exit()
-        main(**args.__dict__)
+        execute(**args.__dict__)
     else:
         print(">> Reading data from config file %s" % args.cf)
         settings = parse_json(fp=str(args.cf))
-        main(**settings)
+        execute(**settings)
 
     # https://stackoverflow.com/questions/1325581/how-do-i-check-if-im-running-on-windows-in-python
     # https://medium.com/dreamcatcher-its-blog/making-an-stand-alone-executable-from-a-python-script-using-pyinstaller-d1df9170e263
+
+
+if __name__ == "__main__":
+    main()

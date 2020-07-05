@@ -4,9 +4,11 @@ from os import getcwd, path
 from bs4 import BeautifulSoup
 import urllib3
 from importlib import import_module
+from .utils import system_import
+from .ascii_art import llama_small
 
-ascii_art = import_module(name="ascii_art", package="epubify")
-utils = import_module(name="utils", package="epubify")
+# ascii_art = import_module(name="ascii_art", package="epubify")
+# utils = import_module(name="utils", package="epubify")
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -112,19 +114,6 @@ class Epubify(object):
         self.book_content = final_content
         return self
 
-    # @staticmethod
-    # def system_import(sys, **config):
-    #     module_name = 'drop_box' if sys == 'dropbox' else sys.lower()
-    #     try:
-    #         from importlib import import_module
-    #         class_ = getattr(import_module("systems.%s" % module_name), sys.capitalize())
-    #         system_instance = class_(**config)
-    #     except ImportError as e:
-    #         print(e)
-    #
-    #     return system_instance
-    # Note; Moved to utils
-
     def create_book(self):
         book = mkepub.Book(title=self.title, author=self.author)
         book.add_page(self.title, self.book_content)
@@ -151,7 +140,7 @@ class Epubify(object):
         elif self.mode == 'remote':
             # TODO: save to system (pocket, dropbox etc)
             print(">> Import system [%s]" % sys)
-            target_system = utils.system_import(sys, **self.settings)
+            target_system = system_import(sys, **self.settings)
             import inspect
             if sys == 'dropbox':
                 print("\t>> For dropbox, bytes data is required. Converting book content to bytes.. ")
@@ -159,4 +148,4 @@ class Epubify(object):
                 print(type(book))
                 target_system.save_book(book=self.book_content)
         print(">> Done!")
-        print(ascii_art.llama_small)
+        print(llama_small)
