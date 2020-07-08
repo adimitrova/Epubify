@@ -21,8 +21,8 @@ Enjoy!
 ------------
 
 ```shell
-git clone git://github.com/adimitrova/coding_projects.git
-cd Python/epubify
+git clone git://github.com/adimitrova/Epubify.git
+cd Epubify
 pip install -r requirements.txt
 ```
 
@@ -36,7 +36,7 @@ Once you run ePubify, it will use epubify's code to request user access code, it
 To start the application, create your json config file, copy the path to it and run as follows:
 
 ```shell
-python3 main.py --cf '/path/to/config.json'
+python3 -m Epubify --cf '/path/to/config.json'
 ```
 
 __NB!__ Sample config available: `sample_configs/pocket_articles_to_dropbox.json`
