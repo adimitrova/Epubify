@@ -92,6 +92,18 @@ def execute(**config):
         print(">> Reading from source system [%s]" % config['from']['system'])
         src_system = system_import('pocket', **config)
         articles = src_system.get_article_list().fetch_articles()
+        # TODO: continue the logic here
+        config['from']['system'] = 'url'
+        config['articles'] = dict()
+        from pprint import pprint
+        for title, url in articles.items():
+            # print(title, '--->', url)
+            article = {
+                "URL": url,
+                "title": title
+            }
+            config['articles'].update(article)
+            pprint(config)
     else:
         process_book(**config)
     print(books)

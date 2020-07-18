@@ -19,41 +19,23 @@ class Epubify(object):
     # TODO: Rework for cases of multiple articles at once OR keep this class as a single article at a time
     # Maybe the latter is better
 
-    def __init__(self, **config):
+    def __init__(self, article_list: list() = None, **config):
         self.settings = config
-
-        self.url = config['article']['url'].strip("\"").strip("\'")
-        self.title = config['article']['title']
-        self.author = config['article']['author']
 
         self.system = config.get("system")
         self.mode = config.get("mode", None)
         self.file_path = config.get('filePath', None)
         self.book_content = ""      # initial state of the text is empty, gets replaces in fetch_html_text()
 
-        #TODO: Fix this mess
-        if not self.mode and not self.file_path:
-            # set local filepath
-            self.file_path = config.get('filePath', '%s/books/%s.epub' % (getcwd(), self.title))
-        elif self.mode == "remote" and not self.file_path:
-            self.file_path = None
-        elif self.mode == "remote" and self.file_path:
-            assert not str(self.file_path).endswith('.epub')
-            self.file_path = config.get('filePath') + '%s.epub' % self.title
-        elif self.file_path is not None and self.mode == 'local':
-            from os import mkdir
-            try:
-                mkdir(self.file_path + '/books/')
-            except FileExistsError:
-                pass
-            self.file_path = self.file_path + '/books/%s.epub' % self.title
+        if not article_list and not config['articles']:
+            self.url = config['article']['url'].strip("\"").strip("\'")
+            self.title = config['article']['title']
+            self.author = config['article']['author']
+
+        # TODO: fix _generate_file_path
+        self.file_path = self._generate_file_path(file_path = self.file_path, **config)
         self.settings['filePath'] = self.file_path
-
-        if not self.file_path:
-            self.file_path = '~/Desktop/' + 'epubify_article.epub'
-
         # update filePath to the dict which will be passed onto the save_book method
-        self.settings['filePath'] = self.file_path
 
         print(">> The book will be saved at: [%s] " % self.file_path)
 
@@ -149,3 +131,25 @@ class Epubify(object):
                 target_system.save_book(book=self.book_content)
         print(">> Done!")
         print(llama_small)
+
+    def _generate_file_path(self, file_path=None, **config):
+        # TODO: Fix this mess
+        if not self.mode and not file_path:
+            # set local filepath
+            file_path = config.get('filePath', '%s/books/%s.epub' % (getcwd(), self.title))
+        elif self.mode == "remote" and not self.file_path:
+            file_path = None
+        elif self.mode == "remote" and self.file_path:
+            assert not str(self.file_path).endswith('.epub')
+            file_path = config.get('filePath') + '%s.epub' % self.title
+        elif file_path is not None and self.mode == 'local':
+            from os import mkdir
+            try:
+                mkdir(file_path + '/books/')
+            except FileExistsError:
+                pass
+            file_path = file_path + '/books/%s.epub' % self.title
+
+        if not file_path:
+            file_path = '~/Desktop/' + 'epubify_article.epub'
+        return file_path
