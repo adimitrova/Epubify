@@ -4,7 +4,7 @@
     },
     "to": {
         "mode": "remote",
-        "system": "dropbox",
-        "filePath": "REMOVE_FOR_ROOT"
+        "filePath": "REMOVE_FOR_ROOT",
+        "system": "dropbox"
     }
 }

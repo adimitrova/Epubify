@@ -19,7 +19,7 @@ class Epubify(object):
     # TODO: Rework for cases of multiple articles at once OR keep this class as a single article at a time
     # Maybe the latter is better
 
-    def __init__(self, article_list: list() = None, **config):
+    def __init__(self, **config):
         self.settings = config
 
         self.system = config.get("system")
@@ -27,17 +27,18 @@ class Epubify(object):
         self.file_path = config.get('filePath', None)
         self.book_content = ""      # initial state of the text is empty, gets replaces in fetch_html_text()
 
-        if not article_list and not config['articles']:
+        if 'article' not in config.keys():
+            print("Initiating Epubify instance w/o article data.")
+        else:
             self.url = config['article']['url'].strip("\"").strip("\'")
             self.title = config['article']['title']
             self.author = config['article']['author']
 
-        # TODO: fix _generate_file_path
-        self.file_path = self._generate_file_path(file_path = self.file_path, **config)
-        self.settings['filePath'] = self.file_path
-        # update filePath to the dict which will be passed onto the save_book method
-
-        print(">> The book will be saved at: [%s] " % self.file_path)
+            # TODO: fix _generate_file_path
+            self.file_path = self._generate_file_path(file_path = self.file_path, **config)
+            self.settings['filePath'] = self.file_path
+            # update filePath to the dict which will be passed onto the save_book method
+            print(">> The book will be saved at: [%s] " % self.file_path)
 
     def fetch_html_text(self):
         response = requests.get(self.url, verify=False)
@@ -104,33 +105,18 @@ class Epubify(object):
     def save_book(self, book, sys=None):
         if self.mode == 'local':
             # save on local machine
-            try:
-                book.save(self.file_path)
-                print(">> Saved (locally) at: {}".format(self.file_path))
-
-            except FileExistsError as err:
-                print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
-                override = input()
-                if override == 'y':
-                    print(">> Overriding the book")
-                    from os import remove
-                    remove(self.file_path)
-                    book.save(self.file_path)
-                else:
-                    print(">> Skip saving the book..")
-                    pass
+            self._save_book_locally(book)
         elif self.mode == 'remote':
-            # TODO: save to system (pocket, dropbox etc)
-            print(">> Import system [%s]" % sys)
-            target_system = system_import(sys, **self.settings)
-            import inspect
-            if sys == 'dropbox':
-                print("\t>> For dropbox, bytes data is required. Converting book content to bytes.. ")
-                self.book = str.encode(book)
-                print(type(book))
-                target_system.save_book(book=self.book_content)
+            self._save_book_remotely(book, sys)
         print(">> Done!")
         print(llama_small)
+
+    @staticmethod
+    def get_pocket_articles(**config):
+        from .systems.pocket import Pocket
+        pocket_system = Pocket(**config)
+        articles = pocket_system.fetch_pocket_articles().get_article_list()
+        return articles
 
     def _generate_file_path(self, file_path=None, **config):
         # TODO: Fix this mess
@@ -153,3 +139,31 @@ class Epubify(object):
         if not file_path:
             file_path = '~/Desktop/' + 'epubify_article.epub'
         return file_path
+
+    def _save_book_locally(self, book, sys=None):
+        try:
+            book.save(self.file_path)
+            print(">> Saved (locally) at: {}".format(self.file_path))
+
+        except FileExistsError as err:
+            print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
+            override = input()
+            if override == 'y':
+                print(">> Overriding the book")
+                from os import remove
+                remove(self.file_path)
+                book.save(self.file_path)
+            else:
+                print(">> Skip saving the book..")
+                pass
+
+    def _save_book_remotely(self, book, sys=None):
+        # TODO: save to system (pocket, dropbox etc)
+        print(">> Import system [%s]" % sys)
+        target_system = system_import(sys, **self.settings)
+        import inspect
+        if sys == 'dropbox':
+            print("\t>> For dropbox, bytes data is required. Converting book content to bytes.. ")
+            self.book = str.encode(book)
+            print(type(book))
+            target_system.save_book(book=self.book_content)

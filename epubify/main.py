@@ -61,6 +61,63 @@ def input_prompt():
         raise ValueError("Invalid choice. Please enter 1 or 2.")
 
 
+def run_cli():
+
+    parser = argparse.ArgumentParser(description='Welcome to Epubify. '
+                                                 'Use --help to see all the available options.')
+    parser.add_argument('-cf',
+                        help='Path to a JSON config file.'
+                             'If you provide this, skip all the rest.')
+    parser.add_argument('-url',
+                        help='Article URL. Add between single quotes.')
+    # parser.add_argument('-token',
+    #                     help='Dropbox access token. Mandatory if mode is set to `remote` '
+    #                          '(see https://www.dropbox.com/developers/apps)')
+    parser.add_argument('-author', default='epubify',
+                        help='Article author. (Default: `epubify`)')
+    parser.add_argument('-title',
+                        help='Article author. (Default: Will be fetched from the URL)')
+    parser.add_argument('-filepath', '-fp',
+                        help='Directory to store the ebook. (Default: root folder). '
+                             'If mode is set to `remote`, give the path to the Dropbox folder here.')
+    parser.add_argument('-mode', default='local',
+                        help='Mode for storing the converted ebook. Options are: `local` and `remote`.'
+                             '(Default: `local`)')
+    # parser.add_argument('--yes', '-y', action='store_true',
+    #                     help='Answer yes to all.')
+    # parser.add_argument('--no', '-n', action='store_true',
+    #                     help='Answer no to all.')
+    parser.add_argument('--default', '-d', action='store_true',
+                        help='Take default answer on all.')
+    args = parser.parse_args()
+
+    if len(argv) < 1:
+        parser.print_help()
+        exit()
+
+    if not args.cf:
+        if not args.url:
+            print(">> URL is required. Use \n"
+                  "--url \'https://my_url\'")
+            exit()
+
+        if args.mode == 'local' and not args.filepath:
+            args.filepath = '~/Downloads'
+        elif args.mode == 'remote' and not args.filepath:
+            args.filepath = '/'
+        else:
+            pass
+
+        if args.mode == 'remote':
+            print(">> Dropbox token is required for remote mode.")
+            exit()
+        settings = args.__dict__
+    else:
+        print(">> Reading data from config file %s" % args.cf)
+        settings = parse_json(fp=str(args.cf))
+    return settings
+
+
 def process_book(**config):
     print("Processing book.. \n\n")
     epub = Epubify(**config)
@@ -68,6 +125,20 @@ def process_book(**config):
     ebook = epub.fetch_html_text().preprocess_text().create_book()
     epub.save_book(book=ebook, sys='dropbox')
 
+
+def run(**config):
+    if config['from']['system'] == 'pocket':
+        print('pocket')
+        article_dict = Epubify.get_pocket_articles(**config)
+        for item in article_dict.items():
+            print(item, '\n')
+    elif config['from']['system'] == 'url' and config['articles']:
+        print('multiple articles from url')
+    else:
+        raise KeyError("You are either missing the 'articles' key in your config "
+                       "or have entered unsupported source system, other than 'url' or 'pocket'")
+
+    print(books)
 
 def execute(**config):
     # config = input_prompt()
@@ -109,70 +180,18 @@ def execute(**config):
     print(books)
 
 
-def main(**config):
+def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller
     # TODO: Loop over multiple files
     ## https://realpython.com/pyinstaller-python/#preparing-your-project
 
     # TODO: Once reading from pocket is finished, reconsider this argument parser. May be not required anymore
-
-    parser = argparse.ArgumentParser(description='Welcome to Epubify. '
-                                                 'Use --help to see all the available options.')
-    parser.add_argument('-cf',
-                        help='Path to a JSON config file.'
-                             'If you provide this, skip all the rest.')
-    parser.add_argument('-url',
-                        help='Article URL. Add between single quotes.')
-    parser.add_argument('-token',
-                        help='Dropbox access token. Mandatory if mode is set to `remote` '
-                             '(see https://www.dropbox.com/developers/apps)')
-    parser.add_argument('-author', default='epubify',
-                        help='Article author. (Default: `epubify`)')
-    parser.add_argument('-title',
-                        help='Article author. (Default: Will be fetched from the URL)')
-    parser.add_argument('-filepath', '-fp',
-                        help='Directory to store the ebook. (Default: root folder). '
-                             'If mode is set to `remote`, give the path to the Dropbox folder here.')
-    parser.add_argument('-mode', default='local',
-                        help='Mode for storing the converted ebook. Options are: `local` and `remote`.'
-                             '(Default: `local`)')
-    # parser.add_argument('--yes', '-y', action='store_true',
-    #                     help='Answer yes to all.')
-    # parser.add_argument('--no', '-n', action='store_true',
-    #                     help='Answer no to all.')
-    parser.add_argument('--default', '-d', action='store_true',
-                        help='Take default answer on all.')
-    args = parser.parse_args()
-
-    if len(argv) < 1:
-        parser.print_help()
-        exit()
-
-    if not args.cf:
-        if not args.url:
-            print(">> URL is required. Use \n"
-                  "--url \'https://my_url\'")
-            exit()
-
-        if args.mode == 'local' and not args.filepath:
-            args.filepath = '~/Downloads'
-        elif args.mode == 'remote' and not args.filepath:
-            args.filepath = '/'
-        else:
-            pass
-
-        if args.mode == 'remote' and not args.token:
-            print(">> Dropbox token is required for remote mode.")
-            exit()
-        execute(**args.__dict__)
-    else:
-        print(">> Reading data from config file %s" % args.cf)
-        settings = parse_json(fp=str(args.cf))
-        execute(**settings)
+    settings = run_cli()
+    run(**settings)
 
     # https://stackoverflow.com/questions/1325581/how-do-i-check-if-im-running-on-windows-in-python
     # https://medium.com/dreamcatcher-its-blog/making-an-stand-alone-executable-from-a-python-script-using-pyinstaller-d1df9170e263
 
 
 if __name__ == "__main__":
-    main()
+    entry_point()
