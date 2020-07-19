@@ -1,0 +1,8 @@
+{
+    "from": {
+        "system": "pocket"
+    },
+    "to": {
+        "mode": "local"
+    }
+}

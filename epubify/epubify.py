@@ -1,11 +1,10 @@
 # import beautifulsoup4
-import mkepub, re, json, dropbox, requests, urllib
+import mkepub, re, dropbox, requests
 from os import getcwd, path
 from bs4 import BeautifulSoup
 import urllib3
 from importlib import import_module
 from .utils import system_import
-from .ascii_art import llama_small
 
 # ascii_art = import_module(name="ascii_art", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -22,39 +21,52 @@ class Epubify(object):
     def __init__(self, **config):
         self.settings = config
 
-        self.system = config.get("system")
-        self.mode = config.get("mode", None)
-        self.file_path = config.get('filePath', None)
+        self.system_from = config['from'].get('system', None)
+        self.system_to = config['to'].get('system', None)
+        self.mode = config['to']['mode']
+        self.file_path = config['to'].get('filePath', None)
         self.book_content = ""      # initial state of the text is empty, gets replaces in fetch_html_text()
 
         if 'article' not in config.keys():
             print("Initiating Epubify instance w/o article data.")
         else:
             self.url = config['article']['url'].strip("\"").strip("\'")
-            self.title = config['article']['title']
+            pattern = re.compile('([^\s\w]|_)+')
+            # self.title = config['article']['title'].lower()
+            self.title = pattern.sub('', config['article']['title'].lower())
+            self.title = re.sub(r"\s+", '_', self.title)
             self.author = config['article']['author']
 
             # TODO: fix _generate_file_path
-            self.file_path = self._generate_file_path(file_path = self.file_path, **config)
+            if not self.file_path:
+                self.file_path = self._generate_file_path()
             self.settings['filePath'] = self.file_path
             # update filePath to the dict which will be passed onto the save_book method
             print(">> The book will be saved at: [%s] " % self.file_path)
 
     def fetch_html_text(self):
-        response = requests.get(self.url, verify=False)
+        try:
+            response = requests.get(self.url, verify=False)
+            soup = BeautifulSoup(response.content, features="html.parser")
 
-        soup = BeautifulSoup(response.content, features="html.parser")
+            # kill all script and style elements
+            # TODO: Add a check for text in the "meta" element and fetch the text
+            for element in soup(["script", "style", "meta", "footer", "img", "li", "ul"]):
+                element.extract()  # rip it out
 
-        # kill all script and style elements
-        # TODO: Add a check for text in the "meta" element and fetch the text
-        for element in soup(["script", "style", "meta", "footer", "img", "li", "ul"]):
-            element.extract()  # rip it out
-
-        print(">> Getting the HTML content..")
-        text = soup.get_text().strip('\n')
-        print(">> HTML content fetched and stored safely.")
-        self.book_content = text
-        return self     # Note: Enables chaining of another method after this one. (called cascading)
+            print(">> Getting the HTML content..")
+            text = soup.get_text().strip('\n')
+            print(">> HTML content fetched and stored safely.")
+            self.book_content = text
+            return self     # Note: Enables chaining of another method after this one. (called cascading)
+        except requests.exceptions.RequestException as err:
+            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
+            self.book_content = None
+            pass
+        except Exception as err:
+            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
+            self.book_content = None
+            pass
 
     def preprocess_text(self):
         # TODO: Add more cleansing logic
@@ -103,13 +115,13 @@ class Epubify(object):
         return book
 
     def save_book(self, book, sys=None):
+        print("MODE >> ", self.mode)
         if self.mode == 'local':
             # save on local machine
             self._save_book_locally(book)
         elif self.mode == 'remote':
             self._save_book_remotely(book, sys)
         print(">> Done!")
-        print(llama_small)
 
     @staticmethod
     def get_pocket_articles(**config):
@@ -118,27 +130,37 @@ class Epubify(object):
         articles = pocket_system.fetch_pocket_articles().get_article_list()
         return articles
 
-    def _generate_file_path(self, file_path=None, **config):
-        # TODO: Fix this mess
-        if not self.mode and not file_path:
-            # set local filepath
-            file_path = config.get('filePath', '%s/books/%s.epub' % (getcwd(), self.title))
-        elif self.mode == "remote" and not self.file_path:
-            file_path = None
-        elif self.mode == "remote" and self.file_path:
-            assert not str(self.file_path).endswith('.epub')
-            file_path = config.get('filePath') + '%s.epub' % self.title
-        elif file_path is not None and self.mode == 'local':
-            from os import mkdir
-            try:
-                mkdir(file_path + '/books/')
-            except FileExistsError:
-                pass
-            file_path = file_path + '/books/%s.epub' % self.title
+    def _generate_file_path(self):
+        if self.mode == 'local':
+            # local mode nad no path provided = saved in current projects' folder in the books dir
+            self.file_path = '%s/books/%s.epub' % (getcwd(), self.title)
+        if self.mode == 'remote':
+            # remote saving. For now only in dropbox:
+            if self.system_to == 'dropbox':
+                self.file_path = '/'  # root folder
+                # TODO: add check for OS and modify accordingly
 
-        if not file_path:
-            file_path = '~/Desktop/' + 'epubify_article.epub'
-        return file_path
+
+        # TODO: Fix this mess
+        # if not self.mode and not file_path:
+        #     # set local filepath
+        #     file_path = config.get('filePath', '%s/books/%s.epub' % (getcwd(), self.title))
+        # elif self.mode == "remote" and not self.file_path:
+        #     file_path = None
+        # elif self.mode == "remote" and self.file_path:
+        #     assert not str(self.file_path).endswith('.epub')
+        #     file_path = config.get('filePath') + '%s.epub' % self.title
+        # elif file_path is not None and self.mode == 'local':
+        #     from os import mkdir
+        #     try:
+        #         mkdir(file_path + '/books/')
+        #     except FileExistsError:
+        #         pass
+        #     file_path = file_path + '/books/%s.epub' % self.title
+        #
+        # if not file_path:
+        #     file_path = '~/Desktop/' + 'epubify_article.epub'
+        # return file_path
 
     def _save_book_locally(self, book, sys=None):
         try:

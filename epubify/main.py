@@ -2,7 +2,7 @@ import json, argparse
 from sys import modules, argv, exit
 from .epubify import Epubify
 from .utils import system_import
-from .ascii_art import books
+from .ascii_art import books, llama_small, fail_dyno
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -62,7 +62,6 @@ def input_prompt():
 
 
 def run_cli():
-
     parser = argparse.ArgumentParser(description='Welcome to Epubify. '
                                                  'Use --help to see all the available options.')
     parser.add_argument('-cf',
@@ -119,26 +118,41 @@ def run_cli():
 
 
 def process_book(**config):
-    print("Processing book.. \n\n")
     epub = Epubify(**config)
     # Note: Cascading/Chaining method calls - SO COOOOOL BRO!!!!!!!!!
-    ebook = epub.fetch_html_text().preprocess_text().create_book()
-    epub.save_book(book=ebook, sys='dropbox')
+    try:
+        ebook = epub.fetch_html_text().preprocess_text().create_book()
+        epub.save_book(book=ebook, sys=config['to']['system'])
+        # print(llama_small)
+    except Exception as err:
+        print(">> ERROR when fetching HTML content for the article: %s \n SKIPPING ARTICLE." % err)
+        print(fail_dyno)
+    print("="*100)
 
 
 def run(**config):
     if config['from']['system'] == 'pocket':
-        print('pocket')
         article_dict = Epubify.get_pocket_articles(**config)
+        count, total = 0, len(article_dict.items())
         for item in article_dict.items():
-            print(item, '\n')
+            print(">> Processing book {} of {}.. ".format(count, total))
+            config['article'] = {
+                "url": item[1],
+                "title": item[0],
+                "author": "epubify"
+            }
+            # TODO: feature for saving all this in the config for the user to be able to delete
+            #  the articles they don't want and resubmit the file
+            process_book(**config)
+            count += 1
     elif config['from']['system'] == 'url' and config['articles']:
+        # TODO: Finish this, top prio
         print('multiple articles from url')
     else:
         raise KeyError("You are either missing the 'articles' key in your config "
                        "or have entered unsupported source system, other than 'url' or 'pocket'")
-
     print(books)
+
 
 def execute(**config):
     # config = input_prompt()
