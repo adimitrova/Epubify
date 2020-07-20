@@ -1,6 +1,4 @@
 import json, requests, webbrowser, logging, re
-from sys import exit
-from os import getcwd
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +27,7 @@ class Pocket(object):
         self.authenticated = self.authenticate()
         self.pocket_list = ""
 
-    def get_article_list(self):
+    def fetch_pocket_articles(self):
         # http://getpocket.com/developer/docs/v3/retrieve
 
         url = 'https://getpocket.com/v3/get'
@@ -45,7 +43,7 @@ class Pocket(object):
         print(">> Article list successfully retrieved from Pocket.")
         return self
 
-    def fetch_articles(self):
+    def get_article_list(self):
         article_urls = [str(self.pocket_list.get(item).get('given_url')) for item in self.pocket_list]
         article_titles = [str(self.pocket_list.get(item).get('resolved_title')) for item in self.pocket_list]
         articles = dict(zip(article_titles, article_urls))
@@ -57,6 +55,7 @@ class Pocket(object):
         self._step_three_authorize()
         return True
 
+    ######## PRIVATE METHODS ##########
     def __get_req(self, params, base_url):
         response = requests.get(base_url, data=params)
 
@@ -117,4 +116,3 @@ class Pocket(object):
         self.access_code = re.findall("(?:access_token=)(.+)(?:&.+)", response.text)
 
         print(">> Step 3 [Authorization] complete.")
-
