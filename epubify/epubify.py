@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # import beautifulsoup4
 import mkepub, re, dropbox, requests
 from os import getcwd, path
