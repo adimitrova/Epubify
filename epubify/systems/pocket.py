@@ -55,6 +55,7 @@ class Pocket(object):
         self._step_three_authorize()
         return True
 
+    ######## PRIVATE METHODS ##########
     def __get_req(self, params, base_url):
         response = requests.get(base_url, data=params)
 
@@ -115,4 +116,3 @@ class Pocket(object):
         self.access_code = re.findall("(?:access_token=)(.+)(?:&.+)", response.text)
 
         print(">> Step 3 [Authorization] complete.")
-

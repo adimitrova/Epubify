@@ -117,12 +117,12 @@ class Epubify(object):
 
     def save_book(self, book, sys=None):
         if self.mode == 'local':
-            # save on local machine
             self._save_book_locally(book)
         elif self.mode == 'remote':
             self._save_book_remotely(book, sys)
         print(">> Done!")
 
+    ######### STATIC METHODS ##########
     @staticmethod
     def get_pocket_articles(**config):
         from .systems.pocket import Pocket
@@ -130,6 +130,7 @@ class Epubify(object):
         articles = pocket_system.fetch_pocket_articles().get_article_list()
         return articles
 
+    ######## PRIVATE METHODS ##########
     def _generate_file_path(self):
         if self.mode == 'local':
             # local mode nad no path provided = saved in current projects' folder in the books dir
@@ -145,28 +146,6 @@ class Epubify(object):
                 file_path = '/'  # root folder
                 # TODO: add check for OS and modify accordingly
         return file_path
-
-
-        # TODO: Fix this mess
-        # if not self.mode and not file_path:
-        #     # set local filepath
-        #     file_path = config.get('filePath', '%s/books/%s.epub' % (getcwd(), self.title))
-        # elif self.mode == "remote" and not self.file_path:
-        #     file_path = None
-        # elif self.mode == "remote" and self.file_path:
-        #     assert not str(self.file_path).endswith('.epub')
-        #     file_path = config.get('filePath') + '%s.epub' % self.title
-        # elif file_path is not None and self.mode == 'local':
-        #     from os import mkdir
-        #     try:
-        #         mkdir(file_path + '/books/')
-        #     except FileExistsError:
-        #         pass
-        #     file_path = file_path + '/books/%s.epub' % self.title
-        #
-        # if not file_path:
-        #     file_path = '~/Desktop/' + 'epubify_article.epub'
-        # return file_path
 
     def _save_book_locally(self, book):
         try:
