@@ -110,12 +110,12 @@ class Epubify(object):
         return self
 
     def create_book(self):
+        print(">> Creating the book.. ")
         book = mkepub.Book(title=self.title, author=self.author)
         book.add_page(self.title, self.book_content)
         return book
 
     def save_book(self, book, sys=None):
-        print("MODE >> ", self.mode)
         if self.mode == 'local':
             # save on local machine
             self._save_book_locally(book)
@@ -133,12 +133,18 @@ class Epubify(object):
     def _generate_file_path(self):
         if self.mode == 'local':
             # local mode nad no path provided = saved in current projects' folder in the books dir
-            self.file_path = '%s/books/%s.epub' % (getcwd(), self.title)
+            if getcwd().endswith('Epubify'):
+                file_path = '%s/epubify/books/%s.epub' % (getcwd(), self.title)
+            elif getcwd().endswith('epubify'):
+                file_path = '%s/books/%s.epub' % (getcwd(), self.title)
+
         if self.mode == 'remote':
             # remote saving. For now only in dropbox:
             if self.system_to == 'dropbox':
-                self.file_path = '/'  # root folder
+                print("remote mode saving to dropbox")
+                file_path = '/'  # root folder
                 # TODO: add check for OS and modify accordingly
+        return file_path
 
 
         # TODO: Fix this mess
@@ -162,12 +168,12 @@ class Epubify(object):
         #     file_path = '~/Desktop/' + 'epubify_article.epub'
         # return file_path
 
-    def _save_book_locally(self, book, sys=None):
+    def _save_book_locally(self, book):
         try:
             book.save(self.file_path)
             print(">> Saved (locally) at: {}".format(self.file_path))
 
-        except FileExistsError as err:
+        except FileExistsError:
             print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
             override = input()
             if override == 'y':
@@ -179,7 +185,7 @@ class Epubify(object):
                 print(">> Skip saving the book..")
                 pass
 
-    def _save_book_remotely(self, book, sys=None):
+    def _save_book_remotely(self, book, sys):
         # TODO: save to system (pocket, dropbox etc)
         print(">> Import system [%s]" % sys)
         target_system = system_import(sys, **self.settings)

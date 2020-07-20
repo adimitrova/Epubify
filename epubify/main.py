@@ -2,7 +2,7 @@ import json, argparse
 from sys import modules, argv, exit
 from .epubify import Epubify
 from .utils import system_import
-from .ascii_art import books, llama_small, fail_dyno
+from .ascii_art import books, llama_small, error404
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -122,11 +122,11 @@ def process_book(**config):
     # Note: Cascading/Chaining method calls - SO COOOOOL BRO!!!!!!!!!
     try:
         ebook = epub.fetch_html_text().preprocess_text().create_book()
-        epub.save_book(book=ebook, sys=config['to']['system'])
+        epub.save_book(book=ebook, sys=epub.system_to)
         # print(llama_small)
     except Exception as err:
-        print(">> ERROR when fetching HTML content for the article: %s \n SKIPPING ARTICLE." % err)
-        print(fail_dyno)
+        print(">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE." % err)
+        print(error404)
     print("="*100)
 
 
@@ -188,7 +188,6 @@ def execute(**config):
                 "title": title
             }
             config['articles'].update(article)
-            pprint(config)
     else:
         process_book(**config)
     print(books)
