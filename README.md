@@ -48,6 +48,7 @@ __NB!__ Sample config available: `sample_configs/pocket_articles_to_dropbox.json
 #### Local machine
 You can save to local machine by providing the path to a directory where you want to get your books in the end of the processing. You can pass this in the json config, or via CLI with the `-fp` argument. If this argument is skipped, files will be saved to your Desktop.
 
+If not path is provided, the file will be saved in the project directory, inside the `books` folder.
 
 #### Dropbox
 (coming soon)
