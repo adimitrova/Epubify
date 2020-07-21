@@ -1,0 +1,13 @@
+{
+    "from": {
+        "system": "txt"
+    },
+    "to": {
+        "mode": "local"
+    },
+    "articles": [
+        "path/to/file1.txt",
+        "path/to/file2.txt",
+        "path/to/file3.txt"
+    ]
+}
