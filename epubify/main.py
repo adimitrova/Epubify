@@ -1,16 +1,11 @@
 import json, argparse
 from sys import modules, argv, exit
 from .epubify import Epubify
-from .utils import system_import
+from .utils import system_import, read_json
 from .ascii_art import books, llama_small, error404
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
-
-def parse_json(fp):
-    with open(fp, 'r') as file:
-        content = json.load(file)
-    return content
 
 
 def input_prompt():
@@ -40,7 +35,8 @@ def input_prompt():
         title = input()
 
         print(
-            ">> Enter \'local\' mode to save on the machine, or \'remote\' mode to save in a cloud system like dropbox: push ENTER to skip.. ")
+            ">> Enter \'local\' mode to save on the machine, or \'remote\' "
+            "mode to save in a cloud system like dropbox: push ENTER to skip.. ")
         mode = input()
 
         print(">> Enter system (\'dropbox\' and \'pocket\' are currently supported): push ENTER to skip.. ")
@@ -113,7 +109,7 @@ def run_cli():
         settings = args.__dict__
     else:
         print(">> Reading data from config file %s" % args.cf)
-        settings = parse_json(fp=str(args.cf))
+        settings = read_json(file_path=str(args.cf))
     return settings
 
 

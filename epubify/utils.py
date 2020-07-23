@@ -2,6 +2,7 @@ import json
 from uuid import uuid4
 from os import path, rename
 
+
 def system_import(sys, **config):
     module_name = 'drop_box' if sys == 'dropbox' else sys.lower()
     try:
@@ -32,3 +33,15 @@ def append_keyvalue_to_json_file(file_path, key, value):
 
         # rename temporary file replacing old file
         rename(tempfile, file_path)
+
+
+def read_txt(file_path):
+    with open(file_path, 'r') as file:
+        text = file.read()
+    return text
+
+
+def read_json(file_path):
+    with open(file_path, 'r') as file:
+        content = json.load(file)
+    return content
