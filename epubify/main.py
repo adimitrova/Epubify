@@ -167,7 +167,7 @@ def run(**config):
                   "To override this behaviour, add a preprocess key in the config, set it to \'true\'")
             content = read_txt(item['txtPath'])
             config['article'] = {
-                "bookContent": "lala",
+                "bookContent": content,
                 "title": item.get('title', 'epubify_article'),
                 "author": item.get('author', 'epubify')
             }
