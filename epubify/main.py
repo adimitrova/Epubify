@@ -171,6 +171,7 @@ def run(**config):
                 "title": item.get('title', 'epubify_article'),
                 "author": item.get('author', 'epubify')
             }
+            print(content)
             process_book(preprocess=config['from'].pop('preprocess', False),
                          **config)
     else:
