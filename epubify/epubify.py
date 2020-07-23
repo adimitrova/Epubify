@@ -31,7 +31,10 @@ class Epubify(object):
         if 'article' not in config.keys():
             print("Initiating Epubify instance w/o article data.")
         else:
-            self.url = config['article']['url'].strip("\"").strip("\'")
+            if 'url' in config['article'].keys():
+                self.url = config['article']['url'].strip("\"").strip("\'")
+            else:
+                self.txt_path = config['article']['txtPath']
             pattern = re.compile('([^\s\w]|_)+')
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub('', config['article']['title'].lower())
@@ -44,6 +47,7 @@ class Epubify(object):
             self.settings['filePath'] = self.file_path
             # update filePath to the dict which will be passed onto the save_book method
             print(">> The book will be saved at: [%s] " % self.file_path)
+
 
     def fetch_html_text(self):
         try:

@@ -1,7 +1,7 @@
 import json, argparse
 from sys import modules, argv, exit
 from .epubify import Epubify
-from .utils import system_import, read_json
+from .utils import system_import, read_json, read_txt
 from .ascii_art import books, llama_small, error404
 
 # epubify = import_module(name="epubify", package="epubify")
@@ -115,7 +115,6 @@ def run_cli():
 
 def process_book(**config):
     epub = Epubify(**config)
-    # Note: Cascading/Chaining method calls - SO COOOOOL BRO!!!!!!!!!
     try:
         ebook = epub.fetch_html_text().preprocess_text().create_book()
         epub.save_book(book=ebook, sys=epub.system_to)
@@ -144,6 +143,17 @@ def run(**config):
     elif config['from']['system'] == 'url' and config['articles']:
         # TODO: Finish this, top prio
         print('multiple articles from url')
+    elif config['from']['system'] == 'txt':
+        for item in config['articles']:
+            content = read_txt(item['txtPath'])
+            # print(content)
+            config['article'] = {
+                "txtPath": item['txtPath'],
+                "title": item.get('title', 'epubify_article'),
+                "author": item.get('author', 'epubify')
+            }
+            # process_book(**config)
+            # TODO: Finish this
     else:
         raise KeyError("You are either missing the 'articles' key in your config "
                        "or have entered unsupported source system, other than 'url' or 'pocket'")
@@ -152,8 +162,6 @@ def run(**config):
 
 def execute(**config):
     # config = input_prompt()
-    # TODO: Implement subdictionaries or list of items in order to have multiple books processed at once
-
     if config['from']['system'] == 'url':
         if len(config.get('articles')) == 0:
             raise KeyError(""" 
