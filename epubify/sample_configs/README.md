@@ -32,14 +32,14 @@ Following, we have the system to system specific keys.
 ## General notes for all systems
 
 __MANDATORY KEYS__: every dot means one level deeper
+
+- `from`.`system` - always required in order for Epubify to process the data
 - `to`.`mode` - this is a mandatory key in order for the application to decide how to do the processing of the book.
 This is also because if you have dropbox synced locally on your computer, you may still say local and have the application
 saved to a path that leads to your local dropbox synced folder where your eBook reader is syncing from.
 For example I have the following path: `/home/{user_id}/dropbox/apps/Dropbox PocketBook/articles/` location.
-In this case, my mode will be equal to "local" and system will be completely skipped from the config.
+In this case, my mode will be set to "local" and `to`.`system` will be completely skipped from the config.
 See `pocket_to_local.json` config.
-- `from`.`system` - always required in order for Epubify to process the data
-
 
 __OPTIONAL KEYS__: every dot means one level deeper
 - `to`.`filePath` can be added if you wish to save the epub files to a location,
@@ -50,20 +50,3 @@ processing will fail. This will be fixed soon.
 - `to`.`system` - required only when the __`mode`__ is set to __`remote`__. The options that can be assigned to it are:
     - `dropbox` - save to dropbox (__currently in development__)
     - more coming soon
-
-### Pocket to local machine
-
-
-### Pocket to Dropbox
-
-
-### URLs to local machine
-
-
-### URLs to Dropbox
-
-
-### TXT file to local machine
-
-
-### TXT file to Dropbox
