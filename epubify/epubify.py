@@ -31,7 +31,10 @@ class Epubify(object):
         if 'article' not in config.keys():
             print("Initiating Epubify instance w/o article data.")
         else:
-            self.url = config['article']['url'].strip("\"").strip("\'")
+            if 'url' in config['article'].keys():
+                self.url = config['article']['url'].strip("\"").strip("\'")
+            elif 'bookContent' in config['article'].keys():
+                self.book_content = config['article']['bookContent']
             pattern = re.compile('([^\s\w]|_)+')
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub('', config['article']['title'].lower())
@@ -63,11 +66,9 @@ class Epubify(object):
         except requests.exceptions.RequestException as err:
             print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
             self.book_content = None
-            pass
         except Exception as err:
             print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
             self.book_content = None
-            pass
 
     def preprocess_text(self):
         # TODO: Add more cleansing logic
