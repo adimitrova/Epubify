@@ -39,7 +39,7 @@ class Epubify(object):
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub('', config['article']['title'].lower())
             self.title = re.sub(r"\s+", '_', self.title)
-            self.author = config['article']['author']
+            self.author = config['article'].get('author', 'epubify')
 
             # TODO: fix _generate_file_path
             if not self.file_path:
