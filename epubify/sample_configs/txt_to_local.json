@@ -1,6 +1,7 @@
 {
     "from": {
-        "system": "txt"
+        "system": "txt",
+        "preprocess": true
     },
     "to": {
         "mode": "local"
@@ -12,7 +13,7 @@
             "author": "wikipedia"
         },
         {
-            "title": "Fall of the Cabal",
+            "title": "Cold war in Bulgaria and Romania",
             "txtPath": "epubify/txt_files/cold_war_bulgaria_romania_fixed.txt",
             "author": "wikipedia"
         }

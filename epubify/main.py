@@ -4,6 +4,7 @@ from .epubify import Epubify
 from .utils import system_import, read_json, read_txt
 from .ascii_art import books, llama_small, error404
 
+
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
 
@@ -113,20 +114,35 @@ def run_cli():
     return settings
 
 
-def process_book(**config):
+def process_book(preprocess=True, **config):
+    """ Processing book by book separately
+
+    :param preprocess: Whether or not to apply preprocessing and cleaning of the data.
+    Set it to False if reading from txt file which is assumed to not require this
+    :type preprocess: Bool
+
+    :param config: config per article
+    :param config: dict
+    """
     epub = Epubify(**config)
     try:
-        ebook = epub.fetch_html_text().preprocess_text().create_book()
+        if preprocess and 'url' not in config['article'].keys():
+            ebook = epub.preprocess_text().create_book()
+        elif preprocess:
+            ebook = epub.fetch_html_text().preprocess_text().create_book()
+        else:
+            ebook = epub.create_book()
         epub.save_book(book=ebook, sys=epub.system_to)
-        # print(llama_small)
+        print(llama_small)
     except Exception as err:
         print(">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE." % err)
         print(error404)
-    print("="*100)
+    print("=" * 100)
 
 
 def run(**config):
-    if config['from']['system'] == 'pocket':
+    src_system = config['from']['system']
+    if src_system == 'pocket':
         article_dict = Epubify.get_pocket_articles(**config)
         count, total = 0, len(article_dict.items())
         for item in article_dict.items():
@@ -140,61 +156,64 @@ def run(**config):
             #  the articles they don't want and resubmit the file
             process_book(**config)
             count += 1
-    elif config['from']['system'] == 'url' and config['articles']:
+    elif src_system == 'url' and config['articles']:
         # TODO: Finish this, top prio
         print('multiple articles from url')
-    elif config['from']['system'] == 'txt':
-        for item in config['articles']:
+    elif src_system == 'txt':
+        articles = config.pop('articles')
+        for item in articles:
+            print(">> Creating an ebook from a TXT file. Assuming the text is already "
+                  "in a human-readable format and won't be preprocessed."
+                  "To override this behaviour, add a preprocess key in the config, set it to \'true\'")
             content = read_txt(item['txtPath'])
-            # print(content)
             config['article'] = {
-                "txtPath": item['txtPath'],
+                "bookContent": "lala",
                 "title": item.get('title', 'epubify_article'),
                 "author": item.get('author', 'epubify')
             }
-            # process_book(**config)
-            # TODO: Finish this
+            print(config)
+            process_book(preprocess=config['from'].pop('preprocess', False),
+                         **config)
     else:
         raise KeyError("You are either missing the 'articles' key in your config "
-                       "or have entered unsupported source system, other than 'url' or 'pocket'")
+                       "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'")
     print(books)
 
-
-def execute(**config):
-    # config = input_prompt()
-    if config['from']['system'] == 'url':
-        if len(config.get('articles')) == 0:
-            raise KeyError(""" 
-            For reading from URLs, the config file must contain the \"articles\" \n
-            key with the corresponding expected data. For more information, \n
-            see the sample config files\n
-            https://github.com/adimitrova/coding_projects/tree/development/Python/epubify/sample_configs
-            """)
-    elif config.get('articles') and config['from']['system'] == 'url':
-        articles = config.pop('articles')
-        for article in articles:
-            config['article'] = article
-            process_book(**config)
-    elif config['from']['system'] == 'pocket':
-        # TODO: create a pocket object and fetch the URLs and titles of the articles
-        # Then process one by one like above
-        print(">> Reading from source system [%s]" % config['from']['system'])
-        src_system = system_import('pocket', **config)
-        articles = src_system.get_article_list().fetch_articles()
-        # TODO: continue the logic here
-        config['from']['system'] = 'url'
-        config['articles'] = dict()
-        from pprint import pprint
-        for title, url in articles.items():
-            # print(title, '--->', url)
-            article = {
-                "URL": url,
-                "title": title
-            }
-            config['articles'].update(article)
-    else:
-        process_book(**config)
-    print(books)
+# def execute(**config):
+#     # config = input_prompt()
+#     if config['from']['system'] == 'url':
+#         if len(config.get('articles')) == 0:
+#             raise KeyError("""
+#             For reading from URLs, the config file must contain the \"articles\" \n
+#             key with the corresponding expected data. For more information, \n
+#             see the sample config files\n
+#             https://github.com/adimitrova/coding_projects/tree/development/Python/epubify/sample_configs
+#             """)
+#     elif config.get('articles') and config['from']['system'] == 'url':
+#         articles = config.pop('articles')
+#         for article in articles:
+#             config['article'] = article
+#             process_book(**config)
+#     elif config['from']['system'] == 'pocket':
+#         # TODO: create a pocket object and fetch the URLs and titles of the articles
+#         # Then process one by one like above
+#         print(">> Reading from source system [%s]" % config['from']['system'])
+#         src_system = system_import('pocket', **config)
+#         articles = src_system.get_article_list().fetch_articles()
+#         # TODO: continue the logic here
+#         config['from']['system'] = 'url'
+#         config['articles'] = dict()
+#         from pprint import pprint
+#         for title, url in articles.items():
+#             # print(title, '--->', url)
+#             article = {
+#                 "URL": url,
+#                 "title": title
+#             }
+#             config['articles'].update(article)
+#     else:
+#         process_book(**config)
+#     print(books)
 
 
 def entry_point():
