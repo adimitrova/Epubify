@@ -17,7 +17,7 @@ class Pocket(object):
         credential file path etc
         :param kwargs: keyword arguments
         """
-        # self.cred_filename = getcwd() + '/vault/' + kwargs.get('credsFileName', "api_keys.json")
+        # self.cred_filename = getcwd() + '/vault/' + kwargs.get('credsFileName', "ani_keys.json")
         # Define epubify CONSTANTS
         self.config = kwargs
         self.EPUBIFY_KEY = '92033-7e774220ee6e0a96bc04ed2d'
@@ -101,7 +101,7 @@ class Pocket(object):
             Then, please come back here and <PUSH ANY KEY TO CONTINUE>...
             URL: {url}
             """.format(url=url))
-        webbrowser.open(url, new=2)
+        webbrowser.open_new_tab(url)
         input()
         print(">> Step 2 [Authorization] complete.")
 

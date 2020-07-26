@@ -1,31 +1,39 @@
 import dropbox
 import json
-
+from uuid import uuid4
+from os import remove
+from epubify.utils import read_json
 
 class Dropbox(object):
     def __init__(self, **kwargs):
-        self.cred_filename = 'systems/vault/' + kwargs.get('credsFileName', "api_keys.json")
-        self.token = self._fetch_token_from_cred_file(self.cred_filename)
+        self.cred_filename = 'epubify/systems/vault/' + kwargs.get('credsFileName', "api_keys.json")
+        self.token = read_json(file_path=self.cred_filename,
+                               key_name='dropbox').get('token')
         self.dropbox_client = dropbox.Dropbox(oauth2_access_token=self.token)
         account_names = self.dropbox_client.users_get_current_account().name.given_name + ' ' + self.dropbox_client.users_get_current_account().name.surname
         print("\t>> Connected to the dropbox account of", account_names)
-        self.output_file_path = kwargs.get('filePath', '')      # if no filePath, save to root
-        self.save_mode = kwargs.get('save_mode')    # to overwrite the file if exists or not, default is NOT
+        if 'filePath' not in kwargs['to'].keys():
+            self.output_file_path = '/%s.epub' % kwargs['article'].get('title')    # if no filePath, save to root
+        else:
+            self.output_file_path = '{given_path}/{book_title}.epub'.format(given_path=kwargs['to'].get('filePath'),
+                                                                       book_title=kwargs['article'].get('title'))   # if no filePath, save to root
 
-    def _fetch_token_from_cred_file(self, cred_filename):
-        with open(cred_filename, 'r') as file:
-            creds = json.load(file).get('dropbox')
+        self.save_mode = kwargs.get('saveMode')    # to overwrite the file if exists or not, default is NOT
 
-        return creds['token']
-
-    def save_book(self, book):
-        dbx = dropbox.Dropbox(self.token)
+    def save_book(self, book, book_content):
         mode = (dropbox.files.WriteMode.overwrite if self.save_mode == 'overwrite' else dropbox.files.WriteMode.add)
 
+        # Create temp file in order to be able to read bytes after that as this is what Dropbox requires to save it.
+        tmp_path = '/tmp/{}.epub'.format(uuid4())
+        print(tmp_path)
+        book.save(tmp_path)
+
         try:
-                dbx.files_upload(f=book, path=self.output_file_path, mode=mode, mute=True)
+            with open(tmp_path, 'rb') as file:
+                self.dropbox_client.files_upload(f=file.read(), path=self.output_file_path, mode=mode, mute=True)
                 print("\t>> File [SAVED] to Dropbox location: [{}]".format(self.output_file_path, self.output_file_path))
-        except TypeError:
-            raise TypeError("Expecting bytes data as input for the upload on dropbox.")
+                remove(tmp_path)    # Delete the temp file
+        except TypeError as err:
+            raise TypeError("Expecting bytes data as input for the upload on dropbox. >> ERR >> %s" %err)
         except Exception as err:
-            raise Exception("There was a problem uploading file %s to Dropbox. Error: %s" % (self.output_file_path, err))
+            raise Exception("There was a problem uploading file %s to Dropbox. >> ERR >> %s" % (self.output_file_path, err))
