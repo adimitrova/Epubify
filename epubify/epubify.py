@@ -5,7 +5,7 @@ from os import getcwd, path
 from bs4 import BeautifulSoup
 import urllib3
 from importlib import import_module
-from .utils import system_import
+from .utils.utils import system_import
 
 # ascii_art = import_module(name="ascii_art", package="epubify")
 # utils = import_module(name="utils", package="epubify")

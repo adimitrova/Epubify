@@ -54,3 +54,36 @@ If no path is provided, the file will be saved in the project directory, inside 
 You can save remotely to Dropbox by providing setting the system key to `dropbox` and mode to `remote` in the config file. Read more [here](epubify/sample_configs/)
 
 If no path is provided, the file will be saved in the project directory, inside the `root` of your Dropbox.
+
+
+## Project Structure
+
+```text
+epubify/
+├── __init__.py
+├── __main__.py
+├── ascii_art.py
+├── books/
+│   └── README.md
+├── epubify.py
+├── main.py
+├── sample_configs/
+│   ├── pocket_to_dropbox.json
+│   ├── pocket_to_local.json
+│   ├── README.md
+│   ├── txt_to_local.json
+│   ├── urls_to_dropbox.json
+│   └── urls_to_local.json
+├── systems/
+│   ├── __init__.py
+│   ├── drop_box.py
+│   ├── pocket.py
+│   └── vault/
+│       ├── __init__.py
+│       └── my_keys.json
+├── txt_files/
+│   ├── cold_war_bulgaria_romania_fixed.txt
+│   └── fall_of_the_cabal_fixed.txt
+└── utils.py
+
+```

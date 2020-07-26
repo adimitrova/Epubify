@@ -1,8 +1,8 @@
 import json, argparse
-from sys import modules, argv, exit
+from sys import argv, exit
 from .epubify import Epubify
-from .utils import system_import, read_json, read_txt
-from .ascii_art import books, llama_small, error404
+from .utils.utils import read_json, read_txt
+from epubify.utils.ascii_art import books, llama_small, error404
 
 
 # epubify = import_module(name="epubify", package="epubify")

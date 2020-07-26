@@ -2,7 +2,7 @@ import dropbox
 import json
 from uuid import uuid4
 from os import remove
-from epubify.utils import read_json
+from epubify.utils.utils import read_json
 
 class Dropbox(object):
     def __init__(self, **kwargs):
