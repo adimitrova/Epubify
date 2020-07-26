@@ -20,12 +20,11 @@ class Dropbox(object):
 
         self.save_mode = kwargs.get('saveMode')    # to overwrite the file if exists or not, default is NOT
 
-    def save_book(self, book, book_content):
+    def save_book(self, book):
         mode = (dropbox.files.WriteMode.overwrite if self.save_mode == 'overwrite' else dropbox.files.WriteMode.add)
 
         # Create temp file in order to be able to read bytes after that as this is what Dropbox requires to save it.
         tmp_path = '/tmp/{}.epub'.format(uuid4())
-        print(tmp_path)
         book.save(tmp_path)
 
         try:

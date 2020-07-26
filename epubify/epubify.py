@@ -171,4 +171,4 @@ class Epubify(object):
         target_system = system_import(sys, **self.settings)
         import inspect
         if sys == 'dropbox':
-            target_system.save_book(book, book_content=self.book_content)
+            target_system.save_book(book)
