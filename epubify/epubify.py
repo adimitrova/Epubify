@@ -153,7 +153,6 @@ class Epubify(object):
         try:
             book.save(self.file_path)
             print(">> Saved (locally) at: {}".format(self.file_path))
-
         except FileExistsError:
             print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
             override = input()
@@ -172,7 +171,4 @@ class Epubify(object):
         target_system = system_import(sys, **self.settings)
         import inspect
         if sys == 'dropbox':
-            print("\t>> For dropbox, bytes data is required. Converting book content to bytes.. ")
-            self.book = str.encode(book)
-            print(type(book))
-            target_system.save_book(book=self.book_content)
+            target_system.save_book(book)

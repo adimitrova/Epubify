@@ -1,6 +1,7 @@
 import json
 from uuid import uuid4
 from os import path, rename
+import logging
 
 
 def system_import(sys, **config):
@@ -41,7 +42,10 @@ def read_txt(file_path):
     return text
 
 
-def read_json(file_path):
+def read_json(file_path, key_name=None):
     with open(file_path, 'r') as file:
         content = json.load(file)
-    return content
+    if not key_name:
+        return content
+    else:
+        return content[key_name]
