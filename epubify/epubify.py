@@ -22,29 +22,31 @@ class Epubify(object):
     def __init__(self, **config):
         self.settings = config
 
-        self.system_from = config['from'].get('system', None)
-        self.system_to = config['to'].get('system', None)
-        self.mode = config['to']['mode']
-        self.file_path = config['to'].get('filePath', None)
-        self.book_content = ""      # initial state of the text is empty, gets replaces in fetch_html_text()
+        self.system_from = config["from"].get("system", None)
+        self.system_to = config["to"].get("system", None)
+        self.mode = config["to"]["mode"]
+        self.file_path = config["to"].get("filePath", None)
+        self.book_content = (
+            ""  # initial state of the text is empty, gets replaces in fetch_html_text()
+        )
 
-        if 'article' not in config.keys():
+        if "article" not in config.keys():
             print("Initiating Epubify instance w/o article data.")
         else:
-            if 'url' in config['article'].keys():
-                self.url = config['article']['url'].strip("\"").strip("\'")
-            elif 'bookContent' in config['article'].keys():
-                self.book_content = config['article']['bookContent']
-            pattern = re.compile('([^\s\w]|_)+')
+            if "url" in config["article"].keys():
+                self.url = config["article"]["url"].strip('"').strip("'")
+            elif "bookContent" in config["article"].keys():
+                self.book_content = config["article"]["bookContent"]
+            pattern = re.compile("([^\s\w]|_)+")
             # self.title = config['article']['title'].lower()
-            self.title = pattern.sub('', config['article']['title'].lower())
-            self.title = re.sub(r"\s+", '_', self.title)
-            self.author = config['article'].get('author', 'epubify')
+            self.title = pattern.sub("", config["article"]["title"].lower())
+            self.title = re.sub(r"\s+", "_", self.title)
+            self.author = config["article"].get("author", "epubify")
 
             # TODO: fix _generate_file_path
             if not self.file_path:
                 self.file_path = self._generate_file_path()
-            self.settings['filePath'] = self.file_path
+            self.settings["filePath"] = self.file_path
             # update filePath to the dict which will be passed onto the save_book method
             print(">> The book will be saved at: [%s] " % self.file_path)
 
@@ -55,27 +57,39 @@ class Epubify(object):
 
             # kill all script and style elements
             # TODO: Add a check for text in the "meta" element and fetch the text
-            for element in soup(["script", "style", "meta", "footer", "img", "li", "ul"]):
+            for element in soup(
+                ["script", "style", "meta", "footer", "img", "li", "ul"]
+            ):
                 element.extract()  # rip it out
 
             print(">> Getting the HTML content..")
-            text = soup.get_text().strip('\n')
+            text = soup.get_text().strip("\n")
             print(">> HTML content fetched and stored safely.")
             self.book_content = text
-            return self     # Note: Enables chaining of another method after this one. (called cascading)
+            return self  # Note: Enables chaining of another method after this one. (called cascading)
         except requests.exceptions.RequestException as err:
-            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
+            print(
+                ">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE."
+                % (self.file_path, err)
+            )
             self.book_content = None
         except Exception as err:
-            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
+            print(
+                ">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE."
+                % (self.file_path, err)
+            )
             self.book_content = None
 
     def preprocess_text(self):
         # TODO: Add more cleansing logic
         # TODO: break into lines and remove leading and trailing space on each
-        lines = (line.strip() for line in self.book_content.splitlines() if len(line) > 3)
+        lines = (
+            line.strip() for line in self.book_content.splitlines() if len(line) > 3
+        )
 
-        reg_ex = re.compile('(\[[0-9]+\]|\[[a-z]+\]|\[редактиране \| редактиране на кода\])')
+        reg_ex = re.compile(
+            "(\[[0-9]+\]|\[[a-z]+\]|\[редактиране \| редактиране на кода\])"
+        )
         print(">> Processing the text..")
         # break multi-headlines into a line each
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -83,7 +97,7 @@ class Epubify(object):
         for ch in chunks:
             # check if occurrence of the pattern is found in the chunk
             if re.search(reg_ex, ch):
-                match_chunk = re.sub(reg_ex, '', ch)
+                match_chunk = re.sub(reg_ex, "", ch)
                 if len(match_chunk.split(" ")) < 4:
                     # Ignore lines with few words, they are likely unrelated
                     pass
@@ -106,7 +120,7 @@ class Epubify(object):
 
         # reg_ex = re.compile(r'(\[[0-9]+\]|\[[a-z]+\]|\[редактиране \| редактиране на кода\])')
         final_content = new_chunks
-        final_content = re.sub(reg_ex, '', final_content)
+        final_content = re.sub(reg_ex, "", final_content)
         print(">> HTML content processed and saved.")
         self.book_content = final_content
         return self
@@ -118,9 +132,9 @@ class Epubify(object):
         return book
 
     def save_book(self, book, sys=None):
-        if self.mode == 'local':
+        if self.mode == "local":
             self._save_book_locally(book)
-        elif self.mode == 'remote':
+        elif self.mode == "remote":
             self._save_book_remotely(book, sys)
         print(">> Done!")
 
@@ -128,24 +142,25 @@ class Epubify(object):
     @staticmethod
     def get_pocket_articles(**config):
         from .systems.pocket import Pocket
+
         pocket_system = Pocket(**config)
         articles = pocket_system.fetch_pocket_articles().get_article_list()
         return articles
 
     ######## PRIVATE METHODS ##########
     def _generate_file_path(self):
-        if self.mode == 'local':
+        if self.mode == "local":
             # local mode nad no path provided = saved in current projects' folder in the books dir
-            if getcwd().endswith('Epubify'):
-                file_path = '%s/epubify/books/%s.epub' % (getcwd(), self.title)
-            elif getcwd().endswith('epubify'):
-                file_path = '%s/books/%s.epub' % (getcwd(), self.title)
+            if getcwd().endswith("Epubify"):
+                file_path = "%s/epubify/books/%s.epub" % (getcwd(), self.title)
+            elif getcwd().endswith("epubify"):
+                file_path = "%s/books/%s.epub" % (getcwd(), self.title)
 
-        if self.mode == 'remote':
+        if self.mode == "remote":
             # remote saving. For now only in dropbox:
-            if self.system_to == 'dropbox':
+            if self.system_to == "dropbox":
                 print("remote mode saving to dropbox")
-                file_path = '/'  # root folder
+                file_path = "/"  # root folder
                 # TODO: add check for OS and modify accordingly
         return file_path
 
@@ -154,11 +169,16 @@ class Epubify(object):
             book.save(self.file_path)
             print(">> Saved (locally) at: {}".format(self.file_path))
         except FileExistsError:
-            print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
+            print(
+                ">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(
+                    self.file_path
+                )
+            )
             override = input()
-            if override == 'y':
+            if override == "y":
                 print(">> Overriding the book")
                 from os import remove
+
                 remove(self.file_path)
                 book.save(self.file_path)
             else:
@@ -170,5 +190,6 @@ class Epubify(object):
         print(">> Import system [%s]" % sys)
         target_system = system_import(sys, **self.settings)
         import inspect
-        if sys == 'dropbox':
+
+        if sys == "dropbox":
             target_system.save_book(book)

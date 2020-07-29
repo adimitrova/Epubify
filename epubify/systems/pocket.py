@@ -20,7 +20,7 @@ class Pocket(object):
         # self.cred_filename = getcwd() + '/vault/' + kwargs.get('credsFileName', "ani_keys.json")
         # Define epubify CONSTANTS
         self.config = kwargs
-        self.EPUBIFY_KEY = '92033-7e774220ee6e0a96bc04ed2d'
+        self.EPUBIFY_KEY = "92033-7e774220ee6e0a96bc04ed2d"
         self.REDIRECT_URL = "http://worldofinspiration.net/epubify.html"
         self.user_name = ""
         self.access_code = None
@@ -30,22 +30,28 @@ class Pocket(object):
     def fetch_pocket_articles(self):
         # http://getpocket.com/developer/docs/v3/retrieve
 
-        url = 'https://getpocket.com/v3/get'
+        url = "https://getpocket.com/v3/get"
         params = {
             "consumer_key": self.EPUBIFY_KEY,
             "access_token": self.access_code,
             "sort": "newest",
             "contentType": "article",
-            "detailType": "simple"
+            "detailType": "simple",
         }
         response = self.__post_req(base_url=url, params=params)
-        self.pocket_list = response.json().get('list')
+        self.pocket_list = response.json().get("list")
         print(">> Article list successfully retrieved from Pocket.")
         return self
 
     def get_article_list(self):
-        article_urls = [str(self.pocket_list.get(item).get('given_url')) for item in self.pocket_list]
-        article_titles = [str(self.pocket_list.get(item).get('resolved_title')) for item in self.pocket_list]
+        article_urls = [
+            str(self.pocket_list.get(item).get("given_url"))
+            for item in self.pocket_list
+        ]
+        article_titles = [
+            str(self.pocket_list.get(item).get("resolved_title"))
+            for item in self.pocket_list
+        ]
         articles = dict(zip(article_titles, article_urls))
         return articles
 
@@ -75,15 +81,9 @@ class Pocket(object):
     def _step_one_access_code(self):
         print(">> Executing Pocket step 1 [Authentication].. ")
         url = "https://getpocket.com/v3/oauth/request"
-        params = {
-            "consumer_key": self.EPUBIFY_KEY,
-            "redirect_uri": self.REDIRECT_URL
-        }
+        params = {"consumer_key": self.EPUBIFY_KEY, "redirect_uri": self.REDIRECT_URL}
 
-        access_code = self.__post_req(
-            base_url=url,
-            params=params) \
-            .text.split('=')[1]
+        access_code = self.__post_req(base_url=url, params=params).text.split("=")[1]
 
         print(">> Step 1 [Authentication]: Access code received successfully. ")
         self.access_code = access_code
@@ -91,16 +91,19 @@ class Pocket(object):
     def _step_two_user_authorization(self):
         print(">> Executing Pocket step 2 [Authorization].. ")
         url = "https://getpocket.com/auth/authorize?request_token={code}&redirect_uri={redirect_uri}".format(
-            redirect_uri=self.REDIRECT_URL,
-            code=self.access_code,
+            redirect_uri=self.REDIRECT_URL, code=self.access_code,
         )
-        print("""
+        print(
+            """
             Your browser will now open the following URL automatically. Please authorize ePubify
             If the browser doesn't load automatically, please click on the link.
             If you have already authorized ePubify, you will see the \"THANK YOU\" page directly. 
             Then, please come back here and <PUSH ANY KEY TO CONTINUE>...
             URL: {url}
-            """.format(url=url))
+            """.format(
+                url=url
+            )
+        )
         webbrowser.open_new_tab(url)
         input()
         print(">> Step 2 [Authorization] complete.")
