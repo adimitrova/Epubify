@@ -1,7 +1,7 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, read_txt
+from .utils.utils import read_json, read_txt, start_time, end_time
 from epubify.utils.ascii_art import books, llama_small, error404
 
 
@@ -163,8 +163,9 @@ def process_book(preprocess=True, **config):
 
 
 def run(**config):
-    src_system = config["from"]["system"]
-    if src_system == "pocket":
+    src_system = config['from']['system']
+    start_time()
+    if src_system == 'pocket':
         article_dict = Epubify.get_pocket_articles(**config)
         count, total = 0, len(article_dict.items())
         for item in article_dict.items():
@@ -199,44 +200,8 @@ def run(**config):
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
     print(books)
-
-
-# def execute(**config):
-#     # config = input_prompt()
-#     if config['from']['system'] == 'url':
-#         if len(config.get('articles')) == 0:
-#             raise KeyError("""
-#             For reading from URLs, the config file must contain the \"articles\" \n
-#             key with the corresponding expected data. For more information, \n
-#             see the sample config files\n
-#             https://github.com/adimitrova/coding_projects/tree/development/Python/epubify/sample_configs
-#             """)
-#     elif config.get('articles') and config['from']['system'] == 'url':
-#         articles = config.pop('articles')
-#         for article in articles:
-#             config['article'] = article
-#             process_book(**config)
-#     elif config['from']['system'] == 'pocket':
-#         # TODO: create a pocket object and fetch the URLs and titles of the articles
-#         # Then process one by one like above
-#         print(">> Reading from source system [%s]" % config['from']['system'])
-#         src_system = system_import('pocket', **config)
-#         articles = src_system.get_article_list().fetch_articles()
-#         # TODO: continue the logic here
-#         config['from']['system'] = 'url'
-#         config['articles'] = dict()
-#         from pprint import pprint
-#         for title, url in articles.items():
-#             # print(title, '--->', url)
-#             article = {
-#                 "URL": url,
-#                 "title": title
-#             }
-#             config['articles'].update(article)
-#     else:
-#         process_book(**config)
-#     print(books)
-
+    end_time()
+   
 
 def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller

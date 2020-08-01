@@ -1,7 +1,8 @@
-import json
+import json, time, logging
 from uuid import uuid4
 from os import path, rename
-import logging
+
+_start_time = time.time()
 
 
 def system_import(sys, **config):
@@ -15,8 +16,19 @@ def system_import(sys, **config):
         system_instance = class_(**config)
     except ImportError as e:
         print(e)
-
     return system_instance
+
+
+def start_time():
+    global _start_time
+    _start_time = time.time()
+
+
+def end_time():
+    t_sec = round(time.time() - _start_time)
+    (t_min, t_sec) = divmod(t_sec, 60)
+    (t_hour,t_min) = divmod(t_min, 60)
+    print('Time passed: {}hour:{}min:{}sec'.format(t_hour,t_min,t_sec))
 
 
 def set_global(key, value):
