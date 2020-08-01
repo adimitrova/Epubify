@@ -1,7 +1,7 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, read_txt
+from .utils.utils import read_json, read_txt, start_time, end_time
 from epubify.utils.ascii_art import books, llama_small, error404
 
 
@@ -142,6 +142,7 @@ def process_book(preprocess=True, **config):
 
 def run(**config):
     src_system = config['from']['system']
+    start_time()
     if src_system == 'pocket':
         article_dict = Epubify.get_pocket_articles(**config)
         count, total = 0, len(article_dict.items())
@@ -178,6 +179,7 @@ def run(**config):
         raise KeyError("You are either missing the 'articles' key in your config "
                        "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'")
     print(books)
+    end_time()
 
 # def execute(**config):
 #     # config = input_prompt()
