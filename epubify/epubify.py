@@ -50,6 +50,9 @@ class Epubify(object):
             # update filePath to the dict which will be passed onto the save_book method
             print(">> The book will be saved at: [%s] " % self.file_path)
 
+    def get_book_title(self):
+        return self.title, self.author
+
     def fetch_html_text(self):
         try:
             response = requests.get(self.url, verify=False)

@@ -1,7 +1,7 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, read_txt, start_time, end_time
+from .utils.utils import read_json, read_txt, start_time, end_time, write_to_file
 from epubify.utils.ascii_art import books, llama_small, error404
 
 
@@ -159,6 +159,7 @@ def process_book(preprocess=True, **config):
             % err
         )
         print(error404)
+        write_to_file('epubify/books/FAILED.txt', "\t - " + epub.get_book_title()[0])
     print("=" * 100)
 
 
@@ -200,6 +201,7 @@ def run(**config):
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
     print(books)
+    print("The articles that failed to be processed (if any) are stored in 'epubify/books/FAILED.txt'.")
     end_time()
    
 
