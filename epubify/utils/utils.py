@@ -19,6 +19,11 @@ def system_import(sys, **config):
     return system_instance
 
 
+def write_to_file(file_path, file_content):
+    with open(file_path, 'a') as oFile:
+        oFile.write(file_content + '\n')
+
+
 def start_time():
     global _start_time
     _start_time = time.time()
