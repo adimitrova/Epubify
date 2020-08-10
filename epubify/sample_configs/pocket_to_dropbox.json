@@ -4,7 +4,7 @@
     },
     "to": {
         "mode": "remote",
-        "filePath": "/Apps/Dropbox PocketBook/Articles",
+        "filePath": "/Stuff/epubify",
         "system": "dropbox",
         "saveMode": "overwrite"
     },

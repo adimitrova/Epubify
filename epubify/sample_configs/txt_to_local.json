@@ -8,13 +8,8 @@
     },
     "articles": [
         {
-            "title": "Fall of the Cabal",
-            "txtPath": "epubify/txt_files/fall_of_the_cabal_fixed.txt",
-            "author": "wikipedia"
-        },
-        {
-            "title": "Cold war in Bulgaria and Romania",
-            "txtPath": "epubify/txt_files/cold_war_bulgaria_romania_fixed.txt",
+            "title": "How to Dismantle a Democracy",
+            "txtPath": "epubify/txt_files/how_to_dismantle_a_democracy.txt",
             "author": "wikipedia"
         }
     ]

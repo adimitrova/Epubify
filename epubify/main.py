@@ -1,8 +1,12 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, read_txt, start_time, end_time, write_to_file
+from .utils.utils import read_json, write_json, read_txt, start_time, end_time, write_to_file, failed_books_conf_exists, \
+    create_failed_books_config
 from epubify.utils.ascii_art import books, llama_small, error404
+
+TXT_FILE_PREFIX = 'epubify/txt_files/'
+FAILED_BOOKS_CONFIG_PATH = TXT_FILE_PREFIX + 'failed_books.json'
 
 
 # epubify = import_module(name="epubify", package="epubify")
@@ -70,7 +74,7 @@ def input_prompt():
 def run_cli():
     parser = argparse.ArgumentParser(
         description="Welcome to Epubify. "
-        "Use --help to see all the available options."
+                    "Use --help to see all the available options."
     )
     parser.add_argument(
         "-cf",
@@ -90,13 +94,13 @@ def run_cli():
         "-filepath",
         "-fp",
         help="Directory to store the ebook. (Default: root folder). "
-        "If mode is set to `remote`, give the path to the Dropbox folder here.",
+             "If mode is set to `remote`, give the path to the Dropbox folder here.",
     )
     parser.add_argument(
         "-mode",
         default="local",
         help="Mode for storing the converted ebook. Options are: `local` and `remote`."
-        "(Default: `local`)",
+             "(Default: `local`)",
     )
     # parser.add_argument('--yes', '-y', action='store_true',
     #                     help='Answer yes to all.')
@@ -133,6 +137,33 @@ def run_cli():
     return settings
 
 
+def process_failed_book(book):
+    book_title = book.get_book_title()[0]
+    # write the book title to the final list of failed articles
+    write_to_file('epubify/books/FAILED_BOOK_TITLES.txt', "\t - " + book_title)
+    # TODO: Save the book context as txt and generate a failed_books.json config to process txt to local
+    if not failed_books_conf_exists(file_path=FAILED_BOOKS_CONFIG_PATH):
+        create_failed_books_config(file_path=FAILED_BOOKS_CONFIG_PATH)
+    # write the book content as a TXT file
+    write_to_file(file_path=TXT_FILE_PREFIX + "{}.txt".format(book_title), file_content=book.book_content)
+
+    # Fetch the current failed books config content
+    current_config = read_json(file_path=FAILED_BOOKS_CONFIG_PATH)
+    print(type(current_config))
+    articles = current_config.get['articles']
+    articles.append(
+        {"title": book_title,
+         "txtPath": TXT_FILE_PREFIX + "{}.txt".format(book_title),
+         "author": "epubify"}
+    )
+    # TODO: Fix this article update code!!!!!
+    # concatenate the updates together
+    final_config = current_config.update(articles)
+    # override the config file with the new version
+    write_json(FAILED_BOOKS_CONFIG_PATH, final_config)
+    return True
+
+
 def process_book(preprocess=True, **config):
     """ Processing book by book separately
 
@@ -152,14 +183,14 @@ def process_book(preprocess=True, **config):
         else:
             ebook = epub.create_book()
         epub.save_book(book=ebook, sys=epub.system_to)
-        print(llama_small)
+        # print(llama_small)
     except Exception as err:
         print(
             ">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE."
             % err
         )
         print(error404)
-        write_to_file('epubify/books/FAILED.txt', "\t - " + epub.get_book_title()[0])
+        process_failed_book(book=epub)
     print("=" * 100)
 
 
@@ -201,9 +232,13 @@ def run(**config):
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
     print(books)
-    print("The articles that failed to be processed (if any) are stored in 'epubify/books/FAILED.txt'.")
+    print("""
+    The articles that failed to be processed (if any) are stored in 'epubify/books/FAILED_BOOK_TITLES.txt'
+    A config file ready to use has been created. To run it and process the failed books (if possible), run:
+    python -m epubify -cf '{}'
+    """).format(FAILED_BOOKS_CONFIG_PATH)
     end_time()
-   
+
 
 def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller
