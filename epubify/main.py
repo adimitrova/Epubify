@@ -175,8 +175,6 @@ def run(**config):
         for item in article_dict.items():
             print(">> Processing book {} of {}.. ".format(count, total))
             config["article"] = {"url": item[1], "title": item[0], "author": "epubify"}
-            # TODO: feature for saving all this in the config for the user to be able to delete
-            #  the articles they don't want and resubmit the file
             process_book(**config)
             count += 1
     elif src_system == "url" and config["articles"]:
@@ -205,7 +203,7 @@ def run(**config):
     print(books)
     print("""
     The articles that failed to be processed (if any) are stored in '{}'
-    A config file ready to use has been created. To run it and process the failed books (if possible), run:
+    A config file ready to use has been generated. To run it and process the failed books (where possible), run:
     python -m epubify -cf '{}'
     """.format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH))
     end_time()
