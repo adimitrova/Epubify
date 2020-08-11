@@ -1,8 +1,7 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, write_json, read_txt, start_time, end_time, write_to_file, failed_books_conf_exists, \
-    create_failed_books_config
+from .utils.utils import read_json, write_json, read_txt, start_time, end_time, process_failed_book, create_failed_books_config
 from epubify.utils.ascii_art import books, llama_small, error404
 
 TXT_FILE_PREFIX = 'epubify/txt_files/'
@@ -137,33 +136,6 @@ def run_cli():
     return settings
 
 
-def process_failed_book(book):
-    book_title = book.get_book_title()[0]
-    # write the book title to the final list of failed articles
-    write_to_file(FAILED_BOOK_TITLES, "\t - " + book_title)
-    # TODO: Save the book context as txt and generate a failed_books.json config to process txt to local
-    if not failed_books_conf_exists(file_path=FAILED_BOOKS_CONFIG_PATH):
-        create_failed_books_config(file_path=FAILED_BOOKS_CONFIG_PATH)
-    # write the book content as a TXT file
-    write_to_file(file_path=TXT_FILE_PREFIX + "{}.txt".format(book_title), file_content=book.book_content)
-
-    # Fetch the current failed books config content
-    current_config = read_json(file_path=FAILED_BOOKS_CONFIG_PATH)
-    print(type(current_config))
-    articles = current_config.get['articles']
-    articles.append(
-        {"title": book_title,
-         "txtPath": TXT_FILE_PREFIX + "{}.txt".format(book_title),
-         "author": "epubify"}
-    )
-    # TODO: Fix this article update code!!!!!
-    # concatenate the updates together
-    final_config = current_config.update(articles)
-    # override the config file with the new version
-    write_json(FAILED_BOOKS_CONFIG_PATH, final_config)
-    return True
-
-
 def process_book(preprocess=True, **config):
     """ Processing book by book separately
 
@@ -183,14 +155,14 @@ def process_book(preprocess=True, **config):
         else:
             ebook = epub.create_book()
         epub.save_book(book=ebook, sys=epub.system_to)
-        # print(llama_small)
+        print(llama_small)
     except Exception as err:
         print(
             ">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE."
             % err
         )
         print(error404)
-        process_failed_book(book=epub)
+        process_failed_book(book=epub, titles_path=FAILED_BOOK_TITLES, books_config_path=FAILED_BOOKS_CONFIG_PATH, prefix=TXT_FILE_PREFIX)
     print("=" * 100)
 
 
@@ -224,7 +196,6 @@ def run(**config):
                 "title": item.get("title", "epubify_article"),
                 "author": item.get("author", "epubify"),
             }
-            print(content)
             process_book(preprocess=config["from"].pop("preprocess", False), **config)
     else:
         raise KeyError(
@@ -235,8 +206,8 @@ def run(**config):
     print("""
     The articles that failed to be processed (if any) are stored in '{}'
     A config file ready to use has been created. To run it and process the failed books (if possible), run:
-    python3 -m Epubify --cf '{}'
-    """).format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH)
+    python -m epubify -cf '{}'
+    """.format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH))
     end_time()
 
 

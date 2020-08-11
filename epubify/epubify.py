@@ -37,7 +37,7 @@ class Epubify(object):
                 self.url = config["article"]["url"].strip('"').strip("'")
             elif "bookContent" in config["article"].keys():
                 self.book_content = config["article"]["bookContent"]
-            pattern = re.compile("([^\s\w]|_)+")
+            pattern = re.compile("([^\s\w]|)+")
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub("", config["article"]["title"].lower())
             self.title = re.sub(r"\s+", "_", self.title)
