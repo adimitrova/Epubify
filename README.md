@@ -85,5 +85,3 @@ epubify/
 │   ├── cold_war_bulgaria_romania_fixed.txt
 │   └── fall_of_the_cabal_fixed.txt
 └── utils.py
-
-```
