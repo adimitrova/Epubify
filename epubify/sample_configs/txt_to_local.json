@@ -1,0 +1,16 @@
+{
+    "from": {
+        "system": "txt",
+        "preprocess": true
+    },
+    "to": {
+        "mode": "local"
+    },
+    "articles": [
+        {
+            "title": "How to Dismantle a Democracy",
+            "txtPath": "epubify/txt_files/how_to_dismantle_a_democracy.txt",
+            "author": "wikipedia"
+        }
+    ]
+}

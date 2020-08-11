@@ -1,0 +1,12 @@
+{
+    "from": {
+        "system": "pocket"
+    },
+    "to": {
+        "mode": "remote",
+        "filePath": "/Stuff/epubify",
+        "system": "dropbox",
+        "saveMode": "overwrite"
+    },
+    "credsFileName": "my_keys.json"
+}

@@ -48,6 +48,40 @@ __NB!__ Sample config available: `sample_configs/pocket_articles_to_dropbox.json
 #### Local machine
 You can save to local machine by providing the path to a directory where you want to get your books in the end of the processing. You can pass this in the json config, or via CLI with the `-fp` argument. If this argument is skipped, files will be saved to your Desktop.
 
+If no path is provided, the file will be saved in the project directory, inside the `books` folder.
 
-#### Dropbox
-(coming soon)
+#### Remotely - to Dropbox
+You can save remotely to Dropbox by providing setting the system key to `dropbox` and mode to `remote` in the config file. Read more [here](epubify/sample_configs/)
+
+If no path is provided, the file will be saved in the project directory, inside the `root` of your Dropbox.
+
+
+## Project Structure
+
+```text
+epubify/
+├── __init__.py
+├── __main__.py
+├── ascii_art.py
+├── books/
+│   └── README.md
+├── epubify.py
+├── main.py
+├── sample_configs/
+│   ├── pocket_to_dropbox.json
+│   ├── pocket_to_local.json
+│   ├── README.md
+│   ├── txt_to_local.json
+│   ├── urls_to_dropbox.json
+│   └── urls_to_local.json
+├── systems/
+│   ├── __init__.py
+│   ├── drop_box.py
+│   ├── pocket.py
+│   └── vault/
+│       ├── __init__.py
+│       └── my_keys.json
+├── txt_files/
+│   ├── cold_war_bulgaria_romania_fixed.txt
+│   └── fall_of_the_cabal_fixed.txt
+└── utils.py

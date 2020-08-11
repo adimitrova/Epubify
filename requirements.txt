@@ -1,0 +1,4 @@
+beautifulsoup4
+mkepub==1.2
+dropbox
+
