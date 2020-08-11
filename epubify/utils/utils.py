@@ -5,6 +5,10 @@ from os import path, rename
 _start_time = time.time()
 
 
+def set_global(key, value):
+    globals()[key] = value
+
+
 def system_import(sys, **config):
     module_name = "drop_box" if sys == "dropbox" else sys.lower()
     try:
@@ -19,11 +23,6 @@ def system_import(sys, **config):
     return system_instance
 
 
-def write_to_file(file_path, file_content):
-    with open(file_path, 'a') as oFile:
-        oFile.write(file_content + '\n')
-
-
 def start_time():
     global _start_time
     _start_time = time.time()
@@ -32,12 +31,53 @@ def start_time():
 def end_time():
     t_sec = round(time.time() - _start_time)
     (t_min, t_sec) = divmod(t_sec, 60)
-    (t_hour,t_min) = divmod(t_min, 60)
-    print('Time passed: {}hour:{}min:{}sec'.format(t_hour,t_min,t_sec))
+    (t_hour, t_min) = divmod(t_min, 60)
+    print('Time passed: {}hour:{}min:{}sec'.format(t_hour, t_min, t_sec))
 
 
-def set_global(key, value):
-    globals()[key] = value
+def failed_books_conf_exists(file_path):
+    if path.exists(file_path):
+        return True
+    else:
+        return False
+
+
+def create_failed_books_config(file_path):
+    config = {
+        "from": {
+            "system": "txt",
+        },
+        "to": {
+            "mode": "local"
+        },
+        "articles": [],
+    }
+    with open(file_path, 'w') as oFile:
+        json.dump(config, oFile)
+
+
+
+def process_failed_book(book, titles_path, books_config_path, prefix):
+    book_title = book.get_book_title()[0]
+    # write the book title to the final list of failed articles
+    write_to_file(titles_path, "\t - " + book_title)
+    if not failed_books_conf_exists(file_path=books_config_path):
+        create_failed_books_config(file_path=books_config_path)
+    # write the book content as a TXT file
+    write_to_file(file_path=prefix + "{}.txt".format(book_title), file_content=book.book_content)
+
+    # Fetch the current failed books config content
+    current_config = read_json(file_path=books_config_path)
+    current_config['articles'].append(
+        {"title": book_title,
+         "txtPath": prefix + "{}.txt".format(book_title),
+         "author": "epubify"}
+    )
+    # TODO: Fix this article update code!!!!!
+    # override the config file with the new version
+    print(">> The config file contains now [{}] failed books.".format(len(current_config['articles'])))
+    write_json(books_config_path, current_config)
+    return True
 
 
 def append_keyvalue_to_json_file(file_path, key, value):
@@ -69,3 +109,14 @@ def read_json(file_path, key_name=None):
         return content
     else:
         return content[key_name]
+
+
+def write_json(file_path, file_content):
+    with open(file_path, 'w', encoding='utf-8') as outfile:
+        json.dump(file_content, outfile)
+
+
+def write_to_file(file_path, file_content):
+    with open(file_path, 'a') as oFile:
+        oFile.write(file_content + '\n')
+

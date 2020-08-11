@@ -1,9 +1,12 @@
 import json, argparse
 from sys import argv, exit
 from .epubify import Epubify
-from .utils.utils import read_json, read_txt, start_time, end_time, write_to_file
+from .utils.utils import read_json, write_json, read_txt, start_time, end_time, process_failed_book, create_failed_books_config
 from epubify.utils.ascii_art import books, llama_small, error404
 
+TXT_FILE_PREFIX = 'epubify/txt_files/'
+FAILED_BOOKS_CONFIG_PATH = TXT_FILE_PREFIX + 'failed_books.json'
+FAILED_BOOK_TITLES = 'epubify/books/FAILED_BOOK_TITLES.txt'
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -70,7 +73,7 @@ def input_prompt():
 def run_cli():
     parser = argparse.ArgumentParser(
         description="Welcome to Epubify. "
-        "Use --help to see all the available options."
+                    "Use --help to see all the available options."
     )
     parser.add_argument(
         "-cf",
@@ -90,13 +93,13 @@ def run_cli():
         "-filepath",
         "-fp",
         help="Directory to store the ebook. (Default: root folder). "
-        "If mode is set to `remote`, give the path to the Dropbox folder here.",
+             "If mode is set to `remote`, give the path to the Dropbox folder here.",
     )
     parser.add_argument(
         "-mode",
         default="local",
         help="Mode for storing the converted ebook. Options are: `local` and `remote`."
-        "(Default: `local`)",
+             "(Default: `local`)",
     )
     # parser.add_argument('--yes', '-y', action='store_true',
     #                     help='Answer yes to all.')
@@ -159,7 +162,7 @@ def process_book(preprocess=True, **config):
             % err
         )
         print(error404)
-        write_to_file('epubify/books/FAILED.txt', "\t - " + epub.get_book_title()[0])
+        process_failed_book(book=epub, titles_path=FAILED_BOOK_TITLES, books_config_path=FAILED_BOOKS_CONFIG_PATH, prefix=TXT_FILE_PREFIX)
     print("=" * 100)
 
 
@@ -172,8 +175,6 @@ def run(**config):
         for item in article_dict.items():
             print(">> Processing book {} of {}.. ".format(count, total))
             config["article"] = {"url": item[1], "title": item[0], "author": "epubify"}
-            # TODO: feature for saving all this in the config for the user to be able to delete
-            #  the articles they don't want and resubmit the file
             process_book(**config)
             count += 1
     elif src_system == "url" and config["articles"]:
@@ -193,7 +194,6 @@ def run(**config):
                 "title": item.get("title", "epubify_article"),
                 "author": item.get("author", "epubify"),
             }
-            print(content)
             process_book(preprocess=config["from"].pop("preprocess", False), **config)
     else:
         raise KeyError(
@@ -201,9 +201,13 @@ def run(**config):
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
     print(books)
-    print("The articles that failed to be processed (if any) are stored in 'epubify/books/FAILED.txt'.")
+    print("""
+    The articles that failed to be processed (if any) are stored in '{}'
+    A config file ready to use has been generated. To run it and process the failed books (where possible), run:
+    python -m epubify -cf '{}'
+    """.format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH))
     end_time()
-   
+
 
 def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller
