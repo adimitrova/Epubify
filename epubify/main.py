@@ -7,7 +7,7 @@ from epubify.utils.ascii_art import books, llama_small, error404
 
 TXT_FILE_PREFIX = 'epubify/txt_files/'
 FAILED_BOOKS_CONFIG_PATH = TXT_FILE_PREFIX + 'failed_books.json'
-
+FAILED_BOOK_TITLES = 'epubify/books/FAILED_BOOK_TITLES.txt'
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -140,7 +140,7 @@ def run_cli():
 def process_failed_book(book):
     book_title = book.get_book_title()[0]
     # write the book title to the final list of failed articles
-    write_to_file('epubify/books/FAILED_BOOK_TITLES.txt', "\t - " + book_title)
+    write_to_file(FAILED_BOOK_TITLES, "\t - " + book_title)
     # TODO: Save the book context as txt and generate a failed_books.json config to process txt to local
     if not failed_books_conf_exists(file_path=FAILED_BOOKS_CONFIG_PATH):
         create_failed_books_config(file_path=FAILED_BOOKS_CONFIG_PATH)
@@ -233,10 +233,10 @@ def run(**config):
         )
     print(books)
     print("""
-    The articles that failed to be processed (if any) are stored in 'epubify/books/FAILED_BOOK_TITLES.txt'
+    The articles that failed to be processed (if any) are stored in '{}'
     A config file ready to use has been created. To run it and process the failed books (if possible), run:
-    python -m epubify -cf '{}'
-    """).format(FAILED_BOOKS_CONFIG_PATH)
+    python3 -m Epubify --cf '{}'
+    """).format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH)
     end_time()
 
 
