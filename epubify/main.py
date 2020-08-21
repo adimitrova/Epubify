@@ -167,6 +167,23 @@ def process_book(preprocess=True, **config):
 
 
 def run(**config):
+    """
+       Main application function. Reads the config and processes respectively.
+
+       Parameters
+       ----------
+       **config: Dict[str, Any]
+           key-word arguments.
+           Config file in json format provided by the user or via the CLI
+           >>> run(**config)
+
+       Returns
+       -------
+       Message for success or failure.
+
+       *numpy doc style, generated in html by sphinx
+       """
+
     src_system = config['from']['system']
     start_time()
     if src_system == 'pocket':
