@@ -1,0 +1,1 @@
+Here will be saved the books that failed to extract as epub for some reason. The app will generate a command to run and finalize your processing with these failed books too.

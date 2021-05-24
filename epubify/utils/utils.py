@@ -116,7 +116,10 @@ def write_json(file_path, file_content):
         json.dump(file_content, outfile)
 
 
-def write_to_file(file_path, file_content):
-    with open(file_path, 'a') as oFile:
-        oFile.write(file_content + '\n')
+def write_to_file(file_path: object, file_content: object) -> object:
+    try:
+        with open(file_path, 'a') as oFile:
+            oFile.write(file_content + '\n')
+    except Exception as err:
+        raise IOError("Error: " + err)
 
