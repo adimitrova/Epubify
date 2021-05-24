@@ -4,6 +4,6 @@ requires = [
     "wheel",
     "beautifulsoup4",
     "mkepub",
-    "dropbox",
+    "dropbox"
 ]
-build-backend = "setuptools.build_meta
+build-backend = "setuptools.build_meta"
