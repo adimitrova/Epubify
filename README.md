@@ -26,6 +26,10 @@ cd Epubify
 pip install -r requirements.txt
 ```
 
+#### Demo:
+
+[Imgur](https://imgur.com/LbZOrtd)
+
 --------
 
 ## Reading articles
