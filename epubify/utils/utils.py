@@ -52,7 +52,7 @@ def create_failed_books_config(file_path):
         },
         "articles": [],
     }
-    with open(file_path, 'w') as oFile:
+    with open(file_path, 'w', encoding="utf-8") as oFile:
         json.dump(config, oFile)
 
 
@@ -60,11 +60,11 @@ def create_failed_books_config(file_path):
 def process_failed_book(book, titles_path, books_config_path, prefix):
     book_title = book.get_book_title()[0]
     # write the book title to the final list of failed articles
-    write_to_file(titles_path, "\t - " + book_title)
+    append_to_file(titles_path, "\t - " + book_title)
     if not failed_books_conf_exists(file_path=books_config_path):
         create_failed_books_config(file_path=books_config_path)
     # write the book content as a TXT file
-    write_to_file(file_path=prefix + "{}.txt".format(book_title), file_content=book.book_content)
+    append_to_file(file_path=prefix + "{}.txt".format(book_title), file_content=book.book_content)
 
     # Fetch the current failed books config content
     current_config = read_json(file_path=books_config_path)
@@ -82,14 +82,14 @@ def process_failed_book(book, titles_path, books_config_path, prefix):
 
 def append_keyvalue_to_json_file(file_path, key, value):
     # Modify the original config file with pocket auth code once authenticated, to avoid re-authentication
-    with open(file_path, "r") as cfi:
+    with open(file_path, "r", encoding="utf-8") as cfi:
         config_file_content = json.load(cfi)
         config_file_content[key] = value
 
     # create randomly named temporary file to avoid
     # interference with other thread/asynchronous request
     tempfile = path.join(path.dirname(file_path), str(uuid4()))
-    with open(tempfile, "w") as cfo:
+    with open(tempfile, "w", encoding="utf-8") as cfo:
         json.dump(config_file_content, cfo, indent=4)
 
     # rename temporary file replacing old file
@@ -97,26 +97,26 @@ def append_keyvalue_to_json_file(file_path, key, value):
 
 
 def read_txt(file_path):
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         text = file.read()
     return text
 
 
 def read_json(file_path, key_name=None):
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         content = json.load(file)
-    if not key_name:
-        return content
-    else:
-        return content[key_name]
 
+    if key_name is not None:
+        return content[key_name]
+   
+    return content
 
 def write_json(file_path, file_content):
     with open(file_path, 'w', encoding='utf-8') as outfile:
         json.dump(file_content, outfile)
 
 
-def write_to_file(file_path, file_content):
-    with open(file_path, 'a') as oFile:
+def append_to_file(file_path, file_content):
+    with open(file_path, 'a', encoding='utf-8') as oFile:
         oFile.write(file_content + '\n')
 
