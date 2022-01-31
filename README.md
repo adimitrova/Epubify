@@ -1,7 +1,7 @@
 <img src="img/epubify.png" alt="drawing" width="300"/>
 
 ![status](https://img.shields.io/badge/status-paused%20-yellow)
-![release](https://img.shields.io/badge/release-v0.1%20beta-green)
+![release](https://img.shields.io/badge/release-v1.0-green)
 ![Black Logo](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 # ePubify
