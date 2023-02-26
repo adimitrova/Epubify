@@ -1,21 +1,22 @@
-import json, argparse
+import argparse
+import json
 from sys import argv, exit
-from .epubify import Epubify
-from .utils.utils import read_json, write_json, read_txt, start_time, end_time, process_failed_book, create_failed_books_config
-from epubify.utils.ascii_art import books, llama_small, error404
 
-TXT_FILE_PREFIX = 'epubify/txt_files/'
-FAILED_BOOKS_CONFIG_PATH = TXT_FILE_PREFIX + 'failed_books.json'
-FAILED_BOOK_TITLES = 'epubify/books/FAILED_BOOK_TITLES.txt'
+from epubify.utils.ascii_art import books, error404, llama_small
+
+from .epubify import Epubify
+from .utils.utils import end_time, process_failed_book, read_json, read_txt, start_time
+
+TXT_FILE_PREFIX = "epubify/txt_files/"
+FAILED_BOOKS_CONFIG_PATH = TXT_FILE_PREFIX + "failed_books.json"
+FAILED_BOOK_TITLES = "epubify/books/FAILED_BOOK_TITLES.txt"
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
 
 
 def input_prompt():
-    print(
-        ">> We will ask you for input. If you would rather have a config file, press 1, for manual input, press 2"
-    )
+    print(">> We will ask you for input. If you would rather have a config file, press 1, for manual input, press 2")
     mode = int(input())
     if mode == 1:
         print(">> Enter config file name, after placing it into system/vault/ dir.")
@@ -28,14 +29,10 @@ def input_prompt():
         print(">> *Enter URL for the page to convert to epub, surrounded by quotes: ")
         url = input()
 
-        print(
-            ">> Enter the name for the new book file: e.g. 'Harry Potter and the order of the phoenix'"
-        )
+        print(">> Enter the name for the new book file: e.g. 'Harry Potter and the order of the phoenix'")
         output_file_name = input()
 
-        print(
-            ">> *Enter credentials file name, after placing it into the system/vault/ dir."
-        )
+        print(">> *Enter credentials file name, after placing it into the system/vault/ dir.")
         creds_path = input()
 
         print(">> Enter book author: ")
@@ -50,9 +47,7 @@ def input_prompt():
         )
         mode = input()
 
-        print(
-            ">> Enter system ('dropbox' and 'pocket' are currently supported): push ENTER to skip.. "
-        )
+        print(">> Enter system ('dropbox' and 'pocket' are currently supported): push ENTER to skip.. ")
         system = input()
 
         config_settings = {
@@ -71,10 +66,7 @@ def input_prompt():
 
 
 def run_cli():
-    parser = argparse.ArgumentParser(
-        description="Welcome to Epubify. "
-                    "Use --help to see all the available options."
-    )
+    parser = argparse.ArgumentParser(description="Welcome to Epubify. " "Use --help to see all the available options.")
     parser.add_argument(
         "-cf",
         help="Path to a JSON config file." "If you provide this, skip all the rest.",
@@ -83,31 +75,24 @@ def run_cli():
     # parser.add_argument('-token',
     #                     help='Dropbox access token. Mandatory if mode is set to `remote` '
     #                          '(see https://www.dropbox.com/developers/apps)')
-    parser.add_argument(
-        "-author", default="epubify", help="Article author. (Default: `epubify`)"
-    )
-    parser.add_argument(
-        "-title", help="Article author. (Default: Will be fetched from the URL)"
-    )
+    parser.add_argument("-author", default="epubify", help="Article author. (Default: `epubify`)")
+    parser.add_argument("-title", help="Article author. (Default: Will be fetched from the URL)")
     parser.add_argument(
         "-filepath",
         "-fp",
         help="Directory to store the ebook. (Default: root folder). "
-             "If mode is set to `remote`, give the path to the Dropbox folder here.",
+        "If mode is set to `remote`, give the path to the Dropbox folder here.",
     )
     parser.add_argument(
         "-mode",
         default="local",
-        help="Mode for storing the converted ebook. Options are: `local` and `remote`."
-             "(Default: `local`)",
+        help="Mode for storing the converted ebook. Options are: `local` and `remote`." "(Default: `local`)",
     )
     # parser.add_argument('--yes', '-y', action='store_true',
     #                     help='Answer yes to all.')
     # parser.add_argument('--no', '-n', action='store_true',
     #                     help='Answer no to all.')
-    parser.add_argument(
-        "--default", "-d", action="store_true", help="Take default answer on all."
-    )
+    parser.add_argument("--default", "-d", action="store_true", help="Take default answer on all.")
     args = parser.parse_args()
 
     if len(argv) < 1:
@@ -137,7 +122,7 @@ def run_cli():
 
 
 def process_book(preprocess=True, **config):
-    """ Processing book by book separately
+    """Processing book by book separately
 
     :param preprocess: Whether or not to apply preprocessing and cleaning of the data.
     Set it to False if reading from txt file which is assumed to not require this
@@ -157,19 +142,21 @@ def process_book(preprocess=True, **config):
         epub.save_book(book=ebook, sys=epub.system_to)
         print(llama_small)
     except Exception as err:
-        print(
-            ">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE."
-            % err
-        )
+        print(">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE." % err)
         print(error404)
-        process_failed_book(book=epub, titles_path=FAILED_BOOK_TITLES, books_config_path=FAILED_BOOKS_CONFIG_PATH, prefix=TXT_FILE_PREFIX)
+        process_failed_book(
+            book=epub,
+            titles_path=FAILED_BOOK_TITLES,
+            books_config_path=FAILED_BOOKS_CONFIG_PATH,
+            prefix=TXT_FILE_PREFIX,
+        )
     print("=" * 100)
 
 
 def run(**config):
-    src_system = config['from']['system']
+    src_system = config["from"]["system"]
     start_time()
-    if src_system == 'pocket':
+    if src_system == "pocket":
         article_dict = Epubify.get_pocket_articles(**config)
         count, total = 0, len(article_dict.items())
         for item in article_dict.items():
@@ -201,18 +188,22 @@ def run(**config):
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
     print(books)
-    print("""
+    print(
+        """
     The articles that failed to be processed (if any) are stored in '{}'
     A config file ready to use has been generated. To run it and process the failed books (where possible), run:
     python -m epubify -cf '{}'
-    """.format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH))
+    """.format(
+            FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH
+        )
+    )
     end_time()
 
 
 def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller
     # TODO: Loop over multiple files
-    ## https://realpython.com/pyinstaller-python/#preparing-your-project
+    # https://realpython.com/pyinstaller-python/#preparing-your-project
 
     # TODO: Once reading from pocket is finished, reconsider this argument parser. May be not required anymore
     settings = run_cli()

@@ -1,6 +1,7 @@
-import json, time, logging
-from uuid import uuid4
+import json
+import time
 from os import path, rename
+from uuid import uuid4
 
 _start_time = time.time()
 
@@ -14,9 +15,7 @@ def system_import(sys, **config):
     try:
         from importlib import import_module
 
-        class_ = getattr(
-            import_module("epubify.systems.%s" % module_name), sys.capitalize()
-        )
+        class_ = getattr(import_module("epubify.systems.%s" % module_name), sys.capitalize())
         system_instance = class_(**config)
     except ImportError as e:
         print(e)
@@ -32,7 +31,7 @@ def end_time():
     t_sec = round(time.time() - _start_time)
     (t_min, t_sec) = divmod(t_sec, 60)
     (t_hour, t_min) = divmod(t_min, 60)
-    print('Time passed: {}hour:{}min:{}sec'.format(t_hour, t_min, t_sec))
+    print("Time passed: {}hour:{}min:{}sec".format(t_hour, t_min, t_sec))
 
 
 def failed_books_conf_exists(file_path):
@@ -47,14 +46,11 @@ def create_failed_books_config(file_path):
         "from": {
             "system": "txt",
         },
-        "to": {
-            "mode": "local"
-        },
+        "to": {"mode": "local"},
         "articles": [],
     }
-    with open(file_path, 'w') as oFile:
+    with open(file_path, "w") as oFile:
         json.dump(config, oFile)
-
 
 
 def process_failed_book(book, titles_path, books_config_path, prefix):
@@ -68,14 +64,12 @@ def process_failed_book(book, titles_path, books_config_path, prefix):
 
     # Fetch the current failed books config content
     current_config = read_json(file_path=books_config_path)
-    current_config['articles'].append(
-        {"title": book_title,
-         "txtPath": prefix + "{}.txt".format(book_title),
-         "author": "epubify"}
+    current_config["articles"].append(
+        {"title": book_title, "txtPath": prefix + "{}.txt".format(book_title), "author": "epubify"}
     )
     # TODO: Fix this article update code!!!!!
     # override the config file with the new version
-    print(">> The config file contains now [{}] failed books.".format(len(current_config['articles'])))
+    print(">> The config file contains now [{}] failed books.".format(len(current_config["articles"])))
     write_json(books_config_path, current_config)
     return True
 
@@ -112,11 +106,10 @@ def read_json(file_path, key_name=None):
 
 
 def write_json(file_path, file_content):
-    with open(file_path, 'w', encoding='utf-8') as outfile:
+    with open(file_path, "w", encoding="utf-8") as outfile:
         json.dump(file_content, outfile)
 
 
 def write_to_file(file_path, file_content):
-    with open(file_path, 'a') as oFile:
-        oFile.write(file_content + '\n')
-
+    with open(file_path, "a") as oFile:
+        oFile.write(file_content + "\n")

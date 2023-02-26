@@ -1,4 +1,8 @@
-import json, requests, webbrowser, logging, re
+import logging
+import re
+import webbrowser
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +48,8 @@ class Pocket(object):
         return self
 
     def get_article_list(self):
-        article_urls = [
-            str(self.pocket_list.get(item).get("given_url"))
-            for item in self.pocket_list
-        ]
-        article_titles = [
-            str(self.pocket_list.get(item).get("resolved_title"))
-            for item in self.pocket_list
-        ]
+        article_urls = [str(self.pocket_list.get(item).get("given_url")) for item in self.pocket_list]
+        article_titles = [str(self.pocket_list.get(item).get("resolved_title")) for item in self.pocket_list]
         articles = dict(zip(article_titles, article_urls))
         return articles
 
@@ -61,7 +59,7 @@ class Pocket(object):
         self._step_three_authorize()
         return True
 
-    ######## PRIVATE METHODS ##########
+    # PRIVATE METHODS
     def __get_req(self, params, base_url):
         response = requests.get(base_url, data=params)
 
@@ -91,13 +89,14 @@ class Pocket(object):
     def _step_two_user_authorization(self):
         print(">> Executing Pocket step 2 [Authorization].. ")
         url = "https://getpocket.com/auth/authorize?request_token={code}&redirect_uri={redirect_uri}".format(
-            redirect_uri=self.REDIRECT_URL, code=self.access_code,
+            redirect_uri=self.REDIRECT_URL,
+            code=self.access_code,
         )
         print(
             """
             Your browser will now open the following URL automatically. Please authorize ePubify
             If the browser doesn't load automatically, please click on the link.
-            If you have already authorized ePubify, you will see the \"THANK YOU\" page directly. 
+            If you have already authorized ePubify, you will see the \"THANK YOU\" page directly.
             Then, please come back here and <PUSH ANY KEY TO CONTINUE>...
             URL: {url}
             """.format(

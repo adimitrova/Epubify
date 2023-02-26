@@ -53,7 +53,7 @@ __NB!__ The path must _NOT_ have a slash at the end, e.g. `path/to/directory` in
     - `dropbox` - save to dropbox (__currently in development__)
     - more coming soon
 - `saveMode` - add this option inside the `to` block to tell Dropbox to save in mode either `overwrite` or `append`
-- `credsFileName`: When the target system is `dropbox`, then this key will serve to give the path to the credentials file for dropbox. You can skip this key, if you create a file called 'api_keys.json' and make it look like below, put the file in `epubify/systems/vault/` directory and it will be fine. 
+- `credsFileName`: When the target system is `dropbox`, then this key will serve to give the path to the credentials file for dropbox. You can skip this key, if you create a file called 'api_keys.json' and make it look like below, put the file in `epubify/systems/vault/` directory and it will be fine.
 
 ```json
 {
@@ -71,7 +71,7 @@ Click "Create app":
 1. Choose an API: "Dropbox API"
 2. Choose the type of access you need
     a) App folder: Select this if you want Epubify to access only a specific folder in your dropbox
-    b) Full Dropbox: Epubify will be able to save anywhere on your dropbox      
+    b) Full Dropbox: Epubify will be able to save anywhere on your dropbox
 3. Name your app: "epubify"
 ```
 
