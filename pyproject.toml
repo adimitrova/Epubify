@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 120
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+filter_files = true
+src_paths = ["epubify", "test"]
+skip_glob = ["*/sample_configs/*", "config/*", "books/*"]

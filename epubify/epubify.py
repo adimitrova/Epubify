@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 # import beautifulsoup4
-import mkepub, re, dropbox, requests
-from os import getcwd, path
-from bs4 import BeautifulSoup
+import re
+from os import getcwd
+
+import mkepub
+import requests
 import urllib3
-from importlib import import_module
+from bs4 import BeautifulSoup
+
 from .utils.utils import system_import
 
 # ascii_art = import_module(name="ascii_art", package="epubify")
@@ -26,9 +29,7 @@ class Epubify(object):
         self.system_to = config["to"].get("system", None)
         self.mode = config["to"]["mode"]
         self.file_path = config["to"].get("filePath", None)
-        self.book_content = (
-            ""  # initial state of the text is empty, gets replaces in fetch_html_text()
-        )
+        self.book_content = ""  # initial state of the text is empty, gets replaces in fetch_html_text()
 
         if "article" not in config.keys():
             print("Initiating Epubify instance w/o article data.")
@@ -37,7 +38,7 @@ class Epubify(object):
                 self.url = config["article"]["url"].strip('"').strip("'")
             elif "bookContent" in config["article"].keys():
                 self.book_content = config["article"]["bookContent"]
-            pattern = re.compile("([^\s\w]|)+")
+            pattern = re.compile(r"([^\s\w]|)+")
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub("", config["article"]["title"].lower())
             self.title = re.sub(r"\s+", "_", self.title)
@@ -60,9 +61,7 @@ class Epubify(object):
 
             # kill all script and style elements
             # TODO: Add a check for text in the "meta" element and fetch the text
-            for element in soup(
-                ["script", "style", "meta", "footer", "img", "li", "ul"]
-            ):
+            for element in soup(["script", "style", "meta", "footer", "img", "li", "ul"]):
                 element.extract()  # rip it out
 
             print(">> Getting the HTML content..")
@@ -71,28 +70,18 @@ class Epubify(object):
             self.book_content = text
             return self  # Note: Enables chaining of another method after this one. (called cascading)
         except requests.exceptions.RequestException as err:
-            print(
-                ">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE."
-                % (self.file_path, err)
-            )
+            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
             self.book_content = None
         except Exception as err:
-            print(
-                ">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE."
-                % (self.file_path, err)
-            )
+            print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
             self.book_content = None
 
     def preprocess_text(self):
         # TODO: Add more cleansing logic
         # TODO: break into lines and remove leading and trailing space on each
-        lines = (
-            line.strip() for line in self.book_content.splitlines() if len(line) > 3
-        )
+        lines = (line.strip() for line in self.book_content.splitlines() if len(line) > 3)
 
-        reg_ex = re.compile(
-            "(\[[0-9]+\]|\[[a-z]+\]|\[редактиране \| редактиране на кода\])"
-        )
+        reg_ex = re.compile(r"(\[[0-9]+\]|\[[a-z]+\]|\[редактиране \| редактиране на кода\])")
         print(">> Processing the text..")
         # break multi-headlines into a line each
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -105,7 +94,8 @@ class Epubify(object):
                     # Ignore lines with few words, they are likely unrelated
                     pass
                 elif len(match_chunk.split(" ")) < 15:
-                    # Keep small lines / sentences, could be related, but separate them from main text to make them more visible.
+                    # Keep small lines / sentences, could be related,
+                    # but separate them from main text to make them more visible.
                     new_chunks += "\n" + match_chunk
                 else:
                     # add the actual text to the new_chunks string.
@@ -115,7 +105,8 @@ class Epubify(object):
                     # Ignore lines with few words, they are likely unrelated
                     pass
                 elif len(ch.split(" ")) < 15:
-                    # Keep small lines / sentences, could be related, but separate them from main text to make them more visible.
+                    # Keep small lines / sentences, could be related,
+                    # but separate them from main text to make them more visible.
                     new_chunks += "\n" + ch
                 else:
                     # add the actual text to the new_chunks string.
@@ -141,7 +132,7 @@ class Epubify(object):
             self._save_book_remotely(book, sys)
         print(">> Done!")
 
-    ######### STATIC METHODS ##########
+    # STATIC METHODS
     @staticmethod
     def get_pocket_articles(**config):
         from .systems.pocket import Pocket
@@ -150,7 +141,7 @@ class Epubify(object):
         articles = pocket_system.fetch_pocket_articles().get_article_list()
         return articles
 
-    ######## PRIVATE METHODS ##########
+    # PRIVATE METHODS
     def _generate_file_path(self):
         if self.mode == "local":
             # local mode nad no path provided = saved in current projects' folder in the books dir
@@ -172,11 +163,7 @@ class Epubify(object):
             book.save(self.file_path)
             print(">> Saved (locally) at: {}".format(self.file_path))
         except FileExistsError:
-            print(
-                ">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(
-                    self.file_path
-                )
-            )
+            print(">> A file with this name already exists at [{}]. \nOVERRIDE? (y/n)".format(self.file_path))
             override = input()
             if override == "y":
                 print(">> Overriding the book")
@@ -192,7 +179,6 @@ class Epubify(object):
         # TODO: save to system (pocket, dropbox etc)
         print(">> Import system [%s]" % sys)
         target_system = system_import(sys, **self.settings)
-        import inspect
 
         if sys == "dropbox":
             target_system.save_book(book)
