@@ -1,4 +1,5 @@
-import json, argparse
+import argparse
+import json
 from sys import argv, exit
 
 from .systems.pocket import Pocket
@@ -17,9 +18,7 @@ FAILED_BOOK_TITLES = os.path.join('epubify','books','FAILED_BOOK_TITLES.txt')
 
 
 def input_prompt():
-    print(
-        ">> We will ask you for input. If you would rather have a config file, press 1, for manual input, press 2"
-    )
+    print(">> We will ask you for input. If you would rather have a config file, press 1, for manual input, press 2")
     mode = int(input())
     if mode == 1:
         print(">> Enter config file name, after placing it into system/vault/ dir.")
@@ -32,14 +31,10 @@ def input_prompt():
         print(">> *Enter URL for the page to convert to epub, surrounded by quotes: ")
         url = input()
 
-        print(
-            ">> Enter the name for the new book file: e.g. 'Harry Potter and the order of the phoenix'"
-        )
+        print(">> Enter the name for the new book file: e.g. 'Harry Potter and the order of the phoenix'")
         output_file_name = input()
 
-        print(
-            ">> *Enter credentials file name, after placing it into the system/vault/ dir."
-        )
+        print(">> *Enter credentials file name, after placing it into the system/vault/ dir.")
         creds_path = input()
 
         print(">> Enter book author: ")
@@ -54,9 +49,7 @@ def input_prompt():
         )
         mode = input()
 
-        print(
-            ">> Enter system ('dropbox' and 'pocket' are currently supported): push ENTER to skip.. "
-        )
+        print(">> Enter system ('dropbox' and 'pocket' are currently supported): push ENTER to skip.. ")
         system = input()
 
         config_settings = {
@@ -75,10 +68,7 @@ def input_prompt():
 
 
 def run_cli():
-    parser = argparse.ArgumentParser(
-        description="Welcome to Epubify. "
-                    "Use --help to see all the available options."
-    )
+    parser = argparse.ArgumentParser(description="Welcome to Epubify. " "Use --help to see all the available options.")
     parser.add_argument(
         "-cf",
         help="Path to a JSON config file." "If you provide this, skip all the rest.",
@@ -87,31 +77,24 @@ def run_cli():
     # parser.add_argument('-token',
     #                     help='Dropbox access token. Mandatory if mode is set to `remote` '
     #                          '(see https://www.dropbox.com/developers/apps)')
-    parser.add_argument(
-        "-author", default="epubify", help="Article author. (Default: `epubify`)"
-    )
-    parser.add_argument(
-        "-title", help="Article author. (Default: Will be fetched from the URL)"
-    )
+    parser.add_argument("-author", default="epubify", help="Article author. (Default: `epubify`)")
+    parser.add_argument("-title", help="Article author. (Default: Will be fetched from the URL)")
     parser.add_argument(
         "-filepath",
         "-fp",
         help="Directory to store the ebook. (Default: root folder). "
-             "If mode is set to `remote`, give the path to the Dropbox folder here.",
+        "If mode is set to `remote`, give the path to the Dropbox folder here.",
     )
     parser.add_argument(
         "-mode",
         default="local",
-        help="Mode for storing the converted ebook. Options are: `local` and `remote`."
-             "(Default: `local`)",
+        help="Mode for storing the converted ebook. Options are: `local` and `remote`." "(Default: `local`)",
     )
     # parser.add_argument('--yes', '-y', action='store_true',
     #                     help='Answer yes to all.')
     # parser.add_argument('--no', '-n', action='store_true',
     #                     help='Answer no to all.')
-    parser.add_argument(
-        "--default", "-d", action="store_true", help="Take default answer on all."
-    )
+    parser.add_argument("--default", "-d", action="store_true", help="Take default answer on all.")
     args = parser.parse_args()
 
     if len(argv) < 1:
@@ -178,15 +161,15 @@ def process_book(from_file, preprocess=True, **config):
 
 def run(**config):
     src_system = config['from']['system']
-    
+
     articles, from_file, process = get_system_config(config, src_system)
-    
+
     for count, article in enumerate(articles):
         print(">> Processing book {} of {}.. ".format(count, len(articles)))
         config["article"] = article
         print("--------")
         process_book(from_file,  process,  **config)
-    
+
     if SHOW_ASCII:
         print(books)
         print("""
@@ -222,15 +205,15 @@ def get_system_config(config, src_system):
             "You are either missing the 'articles' key in your config "
             "or have entered unsupported source system, other than 'url', 'txt', or 'pocket'"
         )
-        
+
     return articles, from_file, process
-    
+
 
 
 def entry_point():
     # TODO: CREATE AN EXECUTABLE with pyinstaller
     # TODO: Loop over multiple files
-    ## https://realpython.com/pyinstaller-python/#preparing-your-project
+    # https://realpython.com/pyinstaller-python/#preparing-your-project
 
     # TODO: Once reading from pocket is finished, reconsider this argument parser. May be not required anymore
     settings = run_cli()

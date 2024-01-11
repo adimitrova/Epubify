@@ -22,17 +22,17 @@ class Pocket(object):
         credential file path etc
         :param kwargs: keyword arguments
         """
-        
+
         self.__access_token = None
         self.consumer_key = consumer_key
         self.redirect_url = redirect_url
         self.pocket_list = ""
-        
+
         if access_token is None:
             self.__access_token = self.__get_access_token()
         else:
             self.__access_token = access_token
-        
+
     def __post_request(self, params, base_url, headers=None):
         response = requests.post(base_url, json=params, headers=headers)
 
@@ -45,7 +45,7 @@ class Pocket(object):
         print(">> Executing Pocket step 1 [Authentication].. ")
 
         url = "https://getpocket.com/v3/oauth/request"
-        
+
         params = {
             "consumer_key": self.consumer_key,
             "redirect_uri": self.redirect_url
@@ -63,7 +63,7 @@ class Pocket(object):
             """
             Your browser will now open the following URL automatically. Please authorize ePubify
             If the browser doesn't load automatically, please click on the link.
-            If you have already authorized ePubify, you will see the \"THANK YOU\" page directly. 
+            If you have already authorized ePubify, you will see the \"THANK YOU\" page directly.
             Then, please come back here and <PUSH ANY KEY TO CONTINUE>...
             URL: {url}
             """.format(
@@ -130,7 +130,7 @@ class Pocket(object):
                 {
                     "url": article["given_url"],
                     "title": article["resolved_title"],
-                    "author": "epubify" 
+                    "author": "epubify"
                 }
                 for _, article in all_articles.items()
             ]

@@ -1,14 +1,14 @@
 <img src="img/epubify.png" alt="drawing" width="300"/>
 
-![status](https://img.shields.io/badge/status-active%20development-yellow)
-![release](https://img.shields.io/badge/release-v0.1%20beta-green)
+![status](https://img.shields.io/badge/status-paused%20-yellow)
+![release](https://img.shields.io/badge/release-v1.0-green)
 ![Black Logo](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 # ePubify
 
 Have you ever wanted to read that huge article, but in a more readable format AND on your EBOOK reader? Maybe you started reading it, but didn't have time to finish? Maybe you use the Pocket application to save your articles? BUT that's not the same like your favourite Kindle or Pocketbook device?! Your eyes hurt?
 
-ePubify is the answer to all that - it's a small application that will fetch the text from your article by having the URL and will store the output epub file directly on your dropbox. If you dropbox contains the folder which your Pocketbook or Kindle syncs from, that means you automatically get that long and interesting article ready for you to sync down on your device and read on your way to work! :) 
+ePubify is the answer to all that - it's a small application that will fetch the text from your article by having the URL and will store the output epub file directly on your dropbox. If you dropbox contains the folder which your Pocketbook or Kindle syncs from, that means you automatically get that long and interesting article ready for you to sync down on your device and read on your way to work! :)
 
 Enjoy!
 
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ## Reading articles
 
 #### Pocket app
-Once you run ePubify, it will use epubify's code to request user access code, it will then request the user to authorize the application by automatically opening the browser. Please accept, if you agree to the term. ePubify will request __full access__. But the only thing it actually does, is read your article list, fetch their original URLs and process them. 
+Once you run ePubify, it will use epubify's code to request user access code, it will then request the user to authorize the application by automatically opening the browser. Please accept, if you agree to the term. ePubify will request __full access__. But the only thing it actually does, is read your article list, fetch their original URLs and process them.
 
 To start the application, create your json config file, copy the path to it and run as follows:
 
