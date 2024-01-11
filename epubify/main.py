@@ -1,17 +1,17 @@
 import argparse
 import json
+import os
 from sys import argv, exit
 
-from .systems.pocket import Pocket
+from epubify.utils.ascii_art import SHOW_ASCII, books, error404, llama_small
+
 from .epubify import Epubify
-from .utils.utils import read_json, write_json, read_txt, start_time, end_time, process_failed_book, create_failed_books_config
-from epubify.utils.ascii_art import books, llama_small, error404, SHOW_ASCII
+from .systems.pocket import Pocket
+from .utils.utils import end_time, process_failed_book, read_json, start_time
 
-import os
-
-TXT_FILE_PREFIX = os.path.join('epubify', 'txt_files')
-FAILED_BOOKS_CONFIG_PATH = os.path.join(TXT_FILE_PREFIX, 'failed_books.json')
-FAILED_BOOK_TITLES = os.path.join('epubify','books','FAILED_BOOK_TITLES.txt')
+TXT_FILE_PREFIX = os.path.join("epubify", "txt_files")
+FAILED_BOOKS_CONFIG_PATH = os.path.join(TXT_FILE_PREFIX, "failed_books.json")
+FAILED_BOOK_TITLES = os.path.join("epubify", "books", "FAILED_BOOK_TITLES.txt")
 
 # epubify = import_module(name="epubify", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -124,7 +124,7 @@ def run_cli():
 
 
 def process_book(from_file, preprocess=True, **config):
-    """ Processing book by book separately
+    """Processing book by book separately
 
     :param preprocess: Whether or not to apply preprocessing and cleaning of the data.
     Set it to False if reading from txt file which is assumed to not require this
@@ -149,18 +149,20 @@ def process_book(from_file, preprocess=True, **config):
         if SHOW_ASCII:
             print(llama_small)
     except Exception as err:
-        print(
-            ">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE."
-            % err
-        )
+        print(">> SOMETHING FAILED when processing the article: %s \n SKIPPING ARTICLE." % err)
         if SHOW_ASCII:
             print(error404)
-        process_failed_book(book=epub, titles_path=FAILED_BOOK_TITLES, books_config_path=FAILED_BOOKS_CONFIG_PATH, prefix=TXT_FILE_PREFIX)
+        process_failed_book(
+            book=epub,
+            titles_path=FAILED_BOOK_TITLES,
+            books_config_path=FAILED_BOOKS_CONFIG_PATH,
+            prefix=TXT_FILE_PREFIX,
+        )
     print("=" * 100)
 
 
 def run(**config):
-    src_system = config['from']['system']
+    src_system = config["from"]["system"]
 
     articles, from_file, process = get_system_config(config, src_system)
 
@@ -168,23 +170,27 @@ def run(**config):
         print(">> Processing book {} of {}.. ".format(count, len(articles)))
         config["article"] = article
         print("--------")
-        process_book(from_file,  process,  **config)
+        process_book(from_file, process, **config)
 
     if SHOW_ASCII:
         print(books)
-        print("""
+        print(
+            """
         The articles that failed to be processed (if any) are stored in '{}'
         A config file ready to use has been generated. To run it and process the failed books (where possible), run:
         python -m epubify -cf '{}'
-        """.format(FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH))
+        """.format(
+                FAILED_BOOK_TITLES, FAILED_BOOKS_CONFIG_PATH
+            )
+        )
+
 
 def get_system_config(config, src_system):
-    if src_system == 'pocket':
-
+    if src_system == "pocket":
         EPUBIFY_KEY = "92033-7e774220ee6e0a96bc04ed2d"
         REDIRECT_URL = "http://worldofinspiration.net/epubify.html"
         access_code = None
-        #TODO save access code in json file and read it from there
+        # TODO save access code in json file and read it from there
 
         pocket_client = Pocket(EPUBIFY_KEY, REDIRECT_URL, access_code)
         articles = pocket_client.get_article_list()
@@ -207,7 +213,6 @@ def get_system_config(config, src_system):
         )
 
     return articles, from_file, process
-
 
 
 def entry_point():

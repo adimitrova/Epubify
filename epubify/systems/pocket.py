@@ -1,19 +1,16 @@
-import requests
 import webbrowser
+
+import requests
 
 
 class Pocket(object):
     """
-        Class to connect to the Pocket app, retrieve the user's article list,
-        retrieve their original URLs
-        in order for Epubify to convert the original URLs into epub files
+    Class to connect to the Pocket app, retrieve the user's article list,
+    retrieve their original URLs
+    in order for Epubify to convert the original URLs into epub files
     """
 
-    POCKET_REQUEST_HEADERS = {
-        "content-type": "application/json; charset=UTF8",
-        "X-Accept": "application/json"
-    }
-
+    POCKET_REQUEST_HEADERS = {"content-type": "application/json; charset=UTF8", "X-Accept": "application/json"}
 
     def __init__(self, consumer_key, redirect_url, access_token=None):
         """
@@ -46,13 +43,13 @@ class Pocket(object):
 
         url = "https://getpocket.com/v3/oauth/request"
 
-        params = {
-            "consumer_key": self.consumer_key,
-            "redirect_uri": self.redirect_url
-        }
+        params = {"consumer_key": self.consumer_key, "redirect_uri": self.redirect_url}
 
-        access_code = self.__post_request(
-            base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS).json().get("code", None)
+        access_code = (
+            self.__post_request(base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS)
+            .json()
+            .get("code", None)
+        )
 
         if not access_code:
             raise Exception("missing code in authentication responce")
@@ -76,7 +73,6 @@ class Pocket(object):
         return access_code
 
     def __get_access_token(self):
-
         if self.__access_token:
             return self.__access_token
 
@@ -90,8 +86,11 @@ class Pocket(object):
         }
 
         url = "https://getpocket.com/v3/oauth/authorize"
-        access_token = self.__post_request(
-            base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS).json().get("access_token", None)
+        access_token = (
+            self.__post_request(base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS)
+            .json()
+            .get("access_token", None)
+        )
 
         if not access_token:
             raise Exception("no valid access token")
@@ -111,8 +110,7 @@ class Pocket(object):
             "detailType": "simple",
         }
 
-        response = self.__post_request(
-            base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS)
+        response = self.__post_request(base_url=url, params=params, headers=Pocket.POCKET_REQUEST_HEADERS)
         articles = response.json().get("list", None)
 
         if articles is None:
@@ -123,14 +121,9 @@ class Pocket(object):
         return articles
 
     def get_article_list(self):
-
         all_articles = self.fetch_pocket_articles()
 
         return [
-                {
-                    "url": article["given_url"],
-                    "title": article["resolved_title"],
-                    "author": "epubify"
-                }
-                for _, article in all_articles.items()
-            ]
+            {"url": article["given_url"], "title": article["resolved_title"], "author": "epubify"}
+            for _, article in all_articles.items()
+        ]

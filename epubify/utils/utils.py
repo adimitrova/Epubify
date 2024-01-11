@@ -49,7 +49,7 @@ def create_failed_books_config(file_path):
         "to": {"mode": "local"},
         "articles": [],
     }
-    with open(file_path, 'w', encoding="utf-8") as oFile:
+    with open(file_path, "w", encoding="utf-8") as oFile:
         json.dump(config, oFile)
 
 
@@ -105,12 +105,12 @@ def read_json(file_path, key_name=None):
 
     return content
 
+
 def write_json(file_path, file_content):
     with open(file_path, "w", encoding="utf-8") as outfile:
         json.dump(file_content, outfile)
 
 
 def append_to_file(file_path, file_content):
-    with open(file_path, 'a', encoding='utf-8') as oFile:
-        oFile.write(file_content + '\n')
-
+    with open(file_path, "a", encoding="utf-8") as oFile:
+        oFile.write(file_content + "\n")

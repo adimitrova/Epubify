@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # import beautifulsoup4
+import os
 import re
 from os import getcwd
 
@@ -8,11 +9,8 @@ import requests
 import urllib3
 from bs4 import BeautifulSoup
 
-from .utils.utils import system_import
-
-from importlib import import_module
 from .utils.utils import read_txt, system_import
-import os
+
 # ascii_art = import_module(name="ascii_art", package="epubify")
 # utils = import_module(name="utils", package="epubify")
 
@@ -42,7 +40,7 @@ class Epubify(object):
             else:
                 self.url = config["article"]["url"].strip('"').strip("'")
 
-            pattern = re.compile("([^\s\w]|)+")
+            pattern = re.compile(r"([^\s\w]|)+")
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub("", config["article"]["title"].lower())
             self.title = re.sub(r"\s+", "_", self.title)
@@ -143,14 +141,14 @@ class Epubify(object):
             self._save_book_remotely(book, sys)
         print(">> Done!")
 
-    ######## PRIVATE METHODS ##########
+    # PRIVATE METHODS
     def _generate_file_path(self):
         if self.mode == "local":
             # local mode nad no path provided = saved in current projects' folder in the books dir
             if getcwd().endswith("Epubify"):
-                file_path = os.path.join(getcwd(),'epubify', 'books', f"{self.title}.epub" )
+                file_path = os.path.join(getcwd(), "epubify", "books", f"{self.title}.epub")
             elif getcwd().endswith("epubify"):
-                file_path = os.path.join(getcwd(),'books', f"{self.title}.epub" )
+                file_path = os.path.join(getcwd(), "books", f"{self.title}.epub")
 
         if self.mode == "remote":
             # remote saving. For now only in dropbox:
