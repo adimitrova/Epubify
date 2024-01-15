@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # import beautifulsoup4
+import os
 import re
 from os import getcwd
 
@@ -8,7 +9,7 @@ import requests
 import urllib3
 from bs4 import BeautifulSoup
 
-from .utils.utils import system_import
+from .utils.utils import read_txt, system_import
 
 # ascii_art = import_module(name="ascii_art", package="epubify")
 # utils = import_module(name="utils", package="epubify")
@@ -22,7 +23,7 @@ class Epubify(object):
     # TODO: Rework for cases of multiple articles at once OR keep this class as a single article at a time
     # Maybe the latter is better
 
-    def __init__(self, **config):
+    def __init__(self, from_file, **config):
         self.settings = config
 
         self.system_from = config["from"].get("system", None)
@@ -34,10 +35,11 @@ class Epubify(object):
         if "article" not in config.keys():
             print("Initiating Epubify instance w/o article data.")
         else:
-            if "url" in config["article"].keys():
+            if from_file:
+                self.url = config["article"]["txtPath"]
+            else:
                 self.url = config["article"]["url"].strip('"').strip("'")
-            elif "bookContent" in config["article"].keys():
-                self.book_content = config["article"]["bookContent"]
+
             pattern = re.compile(r"([^\s\w]|)+")
             # self.title = config['article']['title'].lower()
             self.title = pattern.sub("", config["article"]["title"].lower())
@@ -50,6 +52,11 @@ class Epubify(object):
             self.settings["filePath"] = self.file_path
             # update filePath to the dict which will be passed onto the save_book method
             print(">> The book will be saved at: [%s] " % self.file_path)
+
+    def fetch_content_from_text_file(self):
+        self.book_content = read_txt(self.url)
+
+        return self
 
     def get_book_title(self):
         return self.title, self.author
@@ -68,6 +75,7 @@ class Epubify(object):
             text = soup.get_text().strip("\n")
             print(">> HTML content fetched and stored safely.")
             self.book_content = text
+
             return self  # Note: Enables chaining of another method after this one. (called cascading)
         except requests.exceptions.RequestException as err:
             print(">> ERROR when fetching HTML content for article %s: %s \n SKIPPING ARTICLE." % (self.file_path, err))
@@ -122,6 +130,7 @@ class Epubify(object):
     def create_book(self):
         print(">> Creating the book.. ")
         book = mkepub.Book(title=self.title, author=self.author)
+        # TODO we have a problem with not utf encoding content
         book.add_page(self.title, self.book_content)
         return book
 
@@ -132,23 +141,14 @@ class Epubify(object):
             self._save_book_remotely(book, sys)
         print(">> Done!")
 
-    # STATIC METHODS
-    @staticmethod
-    def get_pocket_articles(**config):
-        from .systems.pocket import Pocket
-
-        pocket_system = Pocket(**config)
-        articles = pocket_system.fetch_pocket_articles().get_article_list()
-        return articles
-
     # PRIVATE METHODS
     def _generate_file_path(self):
         if self.mode == "local":
             # local mode nad no path provided = saved in current projects' folder in the books dir
             if getcwd().endswith("Epubify"):
-                file_path = "%s/epubify/books/%s.epub" % (getcwd(), self.title)
+                file_path = os.path.join(getcwd(), "epubify", "books", f"{self.title}.epub")
             elif getcwd().endswith("epubify"):
-                file_path = "%s/books/%s.epub" % (getcwd(), self.title)
+                file_path = os.path.join(getcwd(), "books", f"{self.title}.epub")
 
         if self.mode == "remote":
             # remote saving. For now only in dropbox:
